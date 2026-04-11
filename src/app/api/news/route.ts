@@ -29,23 +29,24 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${TAVILY_API_KEY}`,
       },
       body: JSON.stringify({
-        api_key: TAVILY_API_KEY,
         query: searchQuery,
         search_depth: 'advanced',
         include_answer: true,
         max_results: 10,
-        time_range: 'week', // Alleen recent nieuws
+        topic: 'news',
+        days: 7,
       }),
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Tavily API error:', errorData);
+      const errText = await response.text().catch(() => '');
+      console.error('Tavily API error:', response.status, errText.slice(0, 300));
       return NextResponse.json(
-        { error: 'Kon geen nieuws ophalen' },
-        { status: 500 }
+        { error: 'Kon geen nieuws ophalen', results: [], answer: '' },
+        { status: 200 }
       );
     }
 

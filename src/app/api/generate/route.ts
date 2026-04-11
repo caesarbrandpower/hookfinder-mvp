@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const prompt = buildPrompt(websiteContent, newsData, companyName, sector);
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-5',
       max_tokens: 2000,
       messages: [
         {
@@ -47,15 +47,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse de JSON respons
+    // Parse de JSON respons. Claude geeft soms de JSON terug in een code-fence of
+    // met wat tekst eromheen, dus halen we eerst het JSON-object eruit.
+    const rawText = content.text;
+    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+    const jsonString = jsonMatch ? jsonMatch[0] : rawText;
+
     try {
-      const hooks = JSON.parse(content.text);
+      const parsed = JSON.parse(jsonString);
+      const hooks = Array.isArray(parsed) ? parsed : parsed.hooks;
+      if (!Array.isArray(hooks)) {
+        throw new Error('Geen hooks array gevonden');
+      }
       return NextResponse.json({ hooks });
     } catch (parseError) {
-      // Als JSON parsing faalt, probeer de text als platte tekst te behandelen
-      console.error('JSON parse error:', parseError);
+      console.error('JSON parse error:', parseError, '\nRaw:', rawText.slice(0, 500));
       return NextResponse.json({
-        hooks: parseTextResponse(content.text),
+        hooks: parseTextResponse(rawText),
       });
     }
   } catch (error) {
