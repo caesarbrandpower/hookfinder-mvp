@@ -1,11 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Copy, Check, Sparkles, Newspaper, Globe, Loader2 } from 'lucide-react';
+import { Search, Copy, Check, Sparkles, Newspaper, Globe, Loader2, FileText } from 'lucide-react';
 
 interface Hook {
   hook: string;
   explanation: string;
+}
+
+interface NewsArticle {
+  title: string;
+  content: string;
+  url: string;
+}
+
+interface NewsData {
+  results: NewsArticle[];
+  answer: string;
+}
+
+interface GenerationContext {
+  websiteContent: string;
+  newsData: NewsData;
+  companyName: string;
+  sector?: string;
 }
 
 interface LoadingState {
@@ -30,6 +48,11 @@ export default function Home() {
   const [error, setError] = useState('');
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [usedFallback, setUsedFallback] = useState(false);
+  const [generationContext, setGenerationContext] = useState<GenerationContext | null>(null);
+  const [pressReleases, setPressReleases] = useState<Record<number, string>>({});
+  const [pressReleaseLoading, setPressReleaseLoading] = useState<Record<number, boolean>>({});
+  const [pressReleaseErrors, setPressReleaseErrors] = useState<Record<number, string>>({});
+  const [pressReleaseCopied, setPressReleaseCopied] = useState<number | null>(null);
 
   const isValidUrl = (str: string): boolean => {
     try {
@@ -62,6 +85,11 @@ export default function Home() {
     setHooks([]);
     setUsedFallback(false);
     setLoadingStep(0);
+    setGenerationContext(null);
+    setPressReleases({});
+    setPressReleaseLoading({});
+    setPressReleaseErrors({});
+    setPressReleaseCopied(null);
 
     try {
       const isUrl = isValidUrl(input);
@@ -101,7 +129,7 @@ export default function Home() {
         }),
       });
 
-      let newsData = { results: [], answer: '' };
+      let newsData: NewsData = { results: [], answer: '' };
       if (newsResponse.ok) {
         newsData = await newsResponse.json();
       }
@@ -131,6 +159,12 @@ export default function Home() {
       if (generateData.hooks && generateData.hooks.length > 0) {
         setHooks(generateData.hooks);
         setUsedFallback(fallbackUsed);
+        setGenerationContext({
+          websiteContent,
+          newsData,
+          companyName,
+          sector: sector || undefined,
+        });
       } else {
         setError('Geen hooks gegenereerd. Probeer het opnieuw.');
       }
@@ -140,6 +174,68 @@ export default function Home() {
     } finally {
       setIsLoading(false);
       setLoadingStep(0);
+    }
+  };
+
+  const generatePressRelease = async (hook: Hook, index: number) => {
+    if (!generationContext) {
+      setPressReleaseErrors((prev) => ({
+        ...prev,
+        [index]: 'Context ontbreekt. Start opnieuw een zoekopdracht.',
+      }));
+      return;
+    }
+
+    setPressReleaseLoading((prev) => ({ ...prev, [index]: true }));
+    setPressReleaseErrors((prev) => {
+      const next = { ...prev };
+      delete next[index];
+      return next;
+    });
+
+    try {
+      const response = await fetch('/api/press-release', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          hook: hook.hook,
+          explanation: hook.explanation,
+          websiteContent: generationContext.websiteContent,
+          newsData: generationContext.newsData,
+          companyName: generationContext.companyName,
+          sector: generationContext.sector,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Kon persbericht niet genereren');
+      }
+
+      const data = await response.json();
+      if (!data.pressRelease) {
+        throw new Error('Lege respons van de server');
+      }
+
+      setPressReleases((prev) => ({ ...prev, [index]: data.pressRelease }));
+    } catch (err) {
+      console.error('Press release error:', err);
+      setPressReleaseErrors((prev) => ({
+        ...prev,
+        [index]: err instanceof Error ? err.message : 'Onverwachte fout',
+      }));
+    } finally {
+      setPressReleaseLoading((prev) => ({ ...prev, [index]: false }));
+    }
+  };
+
+  const copyPressRelease = async (text: string, index: number) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setPressReleaseCopied(index);
+      setTimeout(() => setPressReleaseCopied(null), 2000);
+    } catch (err) {
+      console.error('Copy failed:', err);
     }
   };
 
@@ -348,25 +444,82 @@ export default function Home() {
                       <p className="text-slate-600 text-sm leading-relaxed mb-4">
                         {hook.explanation}
                       </p>
-                      <button
-                        onClick={() => copyToClipboard(
-                          `${hook.hook}\n\n${hook.explanation}`,
-                          index
-                        )}
-                        className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
-                      >
-                        {copiedIndex === index ? (
-                          <>
-                            <Check className="w-4 h-4" />
-                            <span>Gekopieerd!</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-4 h-4" />
-                            <span>Kopieer deze hook</span>
-                          </>
-                        )}
-                      </button>
+                      <div className="flex flex-wrap items-center gap-4">
+                        <button
+                          onClick={() => copyToClipboard(
+                            `${hook.hook}\n\n${hook.explanation}`,
+                            index
+                          )}
+                          className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                        >
+                          {copiedIndex === index ? (
+                            <>
+                              <Check className="w-4 h-4" />
+                              <span>Gekopieerd!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-4 h-4" />
+                              <span>Kopieer deze hook</span>
+                            </>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => generatePressRelease(hook, index)}
+                          disabled={pressReleaseLoading[index]}
+                          className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 disabled:text-slate-400 disabled:cursor-not-allowed font-medium"
+                        >
+                          {pressReleaseLoading[index] ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span>Persbericht schrijven...</span>
+                            </>
+                          ) : (
+                            <>
+                              <FileText className="w-4 h-4" />
+                              <span>
+                                {pressReleases[index] ? 'Opnieuw genereren' : 'Maak persbericht-aanzet'}
+                              </span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+
+                      {pressReleaseErrors[index] && (
+                        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                          {pressReleaseErrors[index]}
+                        </div>
+                      )}
+
+                      {pressReleases[index] && (
+                        <div className="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                              <FileText className="w-4 h-4" />
+                              Persbericht-aanzet
+                            </h4>
+                            <button
+                              onClick={() => copyPressRelease(pressReleases[index], index)}
+                              className="flex items-center gap-2 text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+                            >
+                              {pressReleaseCopied === index ? (
+                                <>
+                                  <Check className="w-3.5 h-3.5" />
+                                  <span>Gekopieerd!</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-3.5 h-3.5" />
+                                  <span>Kopieer</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                          <pre className="whitespace-pre-wrap font-sans text-sm text-slate-700 leading-relaxed">
+                            {pressReleases[index]}
+                          </pre>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -380,6 +533,11 @@ export default function Home() {
                   setInput('');
                   setSector('');
                   setError('');
+                  setGenerationContext(null);
+                  setPressReleases({});
+                  setPressReleaseLoading({});
+                  setPressReleaseErrors({});
+                  setPressReleaseCopied(null);
                 }}
                 className="text-slate-500 hover:text-slate-700 text-sm font-medium"
               >
