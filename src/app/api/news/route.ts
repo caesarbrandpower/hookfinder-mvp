@@ -2,9 +2,37 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
 
+type LangFilter = 'international' | 'nl' | 'en';
+type PeriodFilter = 'week' | 'day' | 'month';
+type MediaTypeFilter = 'all' | 'vakbladen' | 'dagbladen';
+
+const PERIOD_DAYS: Record<PeriodFilter, number> = {
+  day: 1,
+  week: 7,
+  month: 30,
+};
+
+const MEDIA_TYPE_QUERY: Record<MediaTypeFilter, string> = {
+  all: '',
+  vakbladen: ' (vakblad OR brancheblad)',
+  dagbladen: ' (nieuws OR krant)',
+};
+
 export async function POST(request: NextRequest) {
   try {
-    const { query, sector } = await request.json();
+    const {
+      query,
+      sector,
+      lang = 'international',
+      period = 'week',
+      mediaType = 'all',
+    }: {
+      query: string;
+      sector?: string;
+      lang?: LangFilter;
+      period?: PeriodFilter;
+      mediaType?: MediaTypeFilter;
+    } = await request.json();
 
     if (!query) {
       return NextResponse.json(
@@ -21,9 +49,24 @@ export async function POST(request: NextRequest) {
     }
 
     // Bouw de zoekquery
-    const searchQuery = sector 
-      ? `${query} ${sector} nieuws trends`
-      : `${query} nieuws trends`;
+    const base = sector ? `${query} ${sector} nieuws trends` : `${query} nieuws trends`;
+    const mediaSuffix = MEDIA_TYPE_QUERY[mediaType] ?? '';
+    const searchQuery = `${base}${mediaSuffix}`;
+
+    const days = PERIOD_DAYS[period] ?? 7;
+
+    const tavilyBody: Record<string, unknown> = {
+      query: searchQuery,
+      search_depth: 'advanced',
+      include_answer: true,
+      max_results: 10,
+      topic: 'news',
+      days,
+    };
+
+    if (lang === 'nl' || lang === 'en') {
+      tavilyBody.search_lang = lang;
+    }
 
     const response = await fetch('https://api.tavily.com/search', {
       method: 'POST',
@@ -31,14 +74,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${TAVILY_API_KEY}`,
       },
-      body: JSON.stringify({
-        query: searchQuery,
-        search_depth: 'advanced',
-        include_answer: true,
-        max_results: 10,
-        topic: 'news',
-        days: 7,
-      }),
+      body: JSON.stringify(tavilyBody),
     });
 
     if (!response.ok) {

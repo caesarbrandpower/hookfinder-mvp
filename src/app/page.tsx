@@ -15,6 +15,9 @@ interface Hook {
 }
 
 type ContentType = 'persbericht' | 'linkedin' | 'pitch' | 'nieuwsbrief';
+type LangFilter = 'international' | 'nl' | 'en';
+type PeriodFilter = 'week' | 'day' | 'month';
+type MediaTypeFilter = 'all' | 'vakbladen' | 'dagbladen';
 
 interface ContentTypeDef {
   id: ContentType;
@@ -65,6 +68,9 @@ const loadingMessages: LoadingState[] = [
 export default function Home() {
   const [input, setInput] = useState('');
   const [sector, setSector] = useState('');
+  const [lang, setLang] = useState<LangFilter>('international');
+  const [period, setPeriod] = useState<PeriodFilter>('week');
+  const [mediaType, setMediaType] = useState<MediaTypeFilter>('all');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
   const [hooks, setHooks] = useState<Hook[]>([]);
@@ -148,9 +154,12 @@ export default function Home() {
       const newsResponse = await fetch('/api/news', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           query: companyName,
-          sector: sector || undefined 
+          sector: sector || undefined,
+          lang,
+          period,
+          mediaType,
         }),
       });
 
@@ -362,6 +371,68 @@ export default function Home() {
                   className="block w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   disabled={isLoading}
                 />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label
+                  htmlFor="lang"
+                  className="block text-sm font-medium text-slate-700 mb-2"
+                >
+                  Bronnen
+                </label>
+                <select
+                  id="lang"
+                  value={lang}
+                  onChange={(e) => setLang(e.target.value as LangFilter)}
+                  disabled={isLoading}
+                  className="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:opacity-60"
+                >
+                  <option value="international">Internationaal</option>
+                  <option value="nl">Alleen Nederland</option>
+                  <option value="en">Alleen Engels</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="period"
+                  className="block text-sm font-medium text-slate-700 mb-2"
+                >
+                  Periode
+                </label>
+                <select
+                  id="period"
+                  value={period}
+                  onChange={(e) => setPeriod(e.target.value as PeriodFilter)}
+                  disabled={isLoading}
+                  className="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:opacity-60"
+                >
+                  <option value="week">Afgelopen week</option>
+                  <option value="day">Afgelopen 24 uur</option>
+                  <option value="month">Afgelopen maand</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="mediaType"
+                  className="block text-sm font-medium text-slate-700 mb-2"
+                >
+                  Type bronnen
+                </label>
+                <select
+                  id="mediaType"
+                  value={mediaType}
+                  onChange={(e) => setMediaType(e.target.value as MediaTypeFilter)}
+                  disabled={isLoading}
+                  className="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:opacity-60"
+                >
+                  <option value="all">Alle bronnen</option>
+                  <option value="vakbladen">Vakbladen</option>
+                  <option value="dagbladen">Dagbladen & nieuwssites</option>
+                </select>
               </div>
             </div>
 
