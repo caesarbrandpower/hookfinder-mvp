@@ -91,6 +91,7 @@ Genereer op basis van deze combinatie 5 PR-hooks voor een PR-bureau dat dit merk
 Elke hook bestaat uit:
 - De hook: één krachtige zin die een journalist aan het denken zet. Concreet, actueel, nieuwswaardig.
 - Toelichting: twee zinnen. Waarom is dit nu relevant? Voor welk type medium of journalist is dit interessant?
+- Bronnen: een lijst van maximaal 3 nieuwsbronnen (titel + url) uit de meegeleverde artikelen die daadwerkelijk de basis vormen voor deze hook. Als de hook niet op nieuws gebaseerd is, laat de lijst leeg.
 
 Regels:
 - Maak de hooks specifiek voor dit merk en dit moment. Geen generieke PR-adviezen.
@@ -104,10 +105,15 @@ Geef de output in het volgende JSON formaat:
   "hooks": [
     {
       "hook": "De hook tekst",
-      "explanation": "De toelichting tekst"
+      "explanation": "De toelichting tekst",
+      "sources": [
+        { "title": "Exacte titel van het artikel", "url": "https://..." }
+      ]
     }
   ]
 }
+
+Gebruik voor "sources" alleen artikelen die letterlijk in de lijst hieronder staan. Verzin geen titels of urls. Kopieer de titel en url exact zoals ze in de input staan. Maximaal 3 bronnen per hook.
 
 `;
 
@@ -134,6 +140,7 @@ Geef de output in het volgende JSON formaat:
     newsData.results.slice(0, 5).forEach((article, index) => {
       prompt += `Artikel ${index + 1}:\n`;
       prompt += `Titel: ${article.title}\n`;
+      prompt += `URL: ${article.url}\n`;
       prompt += `Content: ${article.content?.substring(0, 500) || 'Geen content'}\n\n`;
     });
   } else {

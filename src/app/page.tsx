@@ -1,12 +1,35 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Copy, Check, Sparkles, Newspaper, Globe, Loader2, FileText } from 'lucide-react';
+import { Search, Copy, Check, Sparkles, Newspaper, Globe, Loader2, FileText, Megaphone, Mail, Link2, ExternalLink } from 'lucide-react';
+
+interface Source {
+  title: string;
+  url: string;
+}
 
 interface Hook {
   hook: string;
   explanation: string;
+  sources?: Source[];
 }
+
+type ContentType = 'persbericht' | 'linkedin' | 'pitch' | 'nieuwsbrief';
+
+interface ContentTypeDef {
+  id: ContentType;
+  label: string;
+  icon: typeof FileText;
+}
+
+const CONTENT_TYPES: ContentTypeDef[] = [
+  { id: 'persbericht', label: 'Persbericht', icon: FileText },
+  { id: 'linkedin', label: 'LinkedIn-post', icon: Link2 },
+  { id: 'pitch', label: 'Pitch-mail journalist', icon: Mail },
+  { id: 'nieuwsbrief', label: 'Nieuwsbrief-intro', icon: Megaphone },
+];
+
+const contentKey = (hookIndex: number, type: ContentType) => `${hookIndex}:${type}`;
 
 interface NewsArticle {
   title: string;
@@ -49,10 +72,11 @@ export default function Home() {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [usedFallback, setUsedFallback] = useState(false);
   const [generationContext, setGenerationContext] = useState<GenerationContext | null>(null);
-  const [pressReleases, setPressReleases] = useState<Record<number, string>>({});
-  const [pressReleaseLoading, setPressReleaseLoading] = useState<Record<number, boolean>>({});
-  const [pressReleaseErrors, setPressReleaseErrors] = useState<Record<number, string>>({});
-  const [pressReleaseCopied, setPressReleaseCopied] = useState<number | null>(null);
+  const [generatedContent, setGeneratedContent] = useState<Record<string, string>>({});
+  const [contentLoading, setContentLoading] = useState<Record<string, boolean>>({});
+  const [contentErrors, setContentErrors] = useState<Record<string, string>>({});
+  const [activeContentType, setActiveContentType] = useState<Record<number, ContentType>>({});
+  const [contentCopied, setContentCopied] = useState<string | null>(null);
 
   const isValidUrl = (str: string): boolean => {
     try {
@@ -86,10 +110,11 @@ export default function Home() {
     setUsedFallback(false);
     setLoadingStep(0);
     setGenerationContext(null);
-    setPressReleases({});
-    setPressReleaseLoading({});
-    setPressReleaseErrors({});
-    setPressReleaseCopied(null);
+    setGeneratedContent({});
+    setContentLoading({});
+    setContentErrors({});
+    setActiveContentType({});
+    setContentCopied(null);
 
     try {
       const isUrl = isValidUrl(input);
@@ -177,27 +202,37 @@ export default function Home() {
     }
   };
 
-  const generatePressRelease = async (hook: Hook, index: number) => {
+  const handleContentTypeClick = async (hook: Hook, hookIndex: number, type: ContentType) => {
+    setActiveContentType((prev) => ({ ...prev, [hookIndex]: type }));
+
+    const key = contentKey(hookIndex, type);
+
+    // Al gegenereerd? Alleen tonen, niet opnieuw ophalen.
+    if (generatedContent[key]) {
+      return;
+    }
+
     if (!generationContext) {
-      setPressReleaseErrors((prev) => ({
+      setContentErrors((prev) => ({
         ...prev,
-        [index]: 'Context ontbreekt. Start opnieuw een zoekopdracht.',
+        [key]: 'Context ontbreekt. Start opnieuw een zoekopdracht.',
       }));
       return;
     }
 
-    setPressReleaseLoading((prev) => ({ ...prev, [index]: true }));
-    setPressReleaseErrors((prev) => {
+    setContentLoading((prev) => ({ ...prev, [key]: true }));
+    setContentErrors((prev) => {
       const next = { ...prev };
-      delete next[index];
+      delete next[key];
       return next;
     });
 
     try {
-      const response = await fetch('/api/press-release', {
+      const response = await fetch('/api/content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          type,
           hook: hook.hook,
           explanation: hook.explanation,
           websiteContent: generationContext.websiteContent,
@@ -209,31 +244,31 @@ export default function Home() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Kon persbericht niet genereren');
+        throw new Error(errorData.error || 'Kon content niet genereren');
       }
 
       const data = await response.json();
-      if (!data.pressRelease) {
+      if (!data.content) {
         throw new Error('Lege respons van de server');
       }
 
-      setPressReleases((prev) => ({ ...prev, [index]: data.pressRelease }));
+      setGeneratedContent((prev) => ({ ...prev, [key]: data.content }));
     } catch (err) {
-      console.error('Press release error:', err);
-      setPressReleaseErrors((prev) => ({
+      console.error('Content generation error:', err);
+      setContentErrors((prev) => ({
         ...prev,
-        [index]: err instanceof Error ? err.message : 'Onverwachte fout',
+        [key]: err instanceof Error ? err.message : 'Onverwachte fout',
       }));
     } finally {
-      setPressReleaseLoading((prev) => ({ ...prev, [index]: false }));
+      setContentLoading((prev) => ({ ...prev, [key]: false }));
     }
   };
 
-  const copyPressRelease = async (text: string, index: number) => {
+  const copyContent = async (text: string, key: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setPressReleaseCopied(index);
-      setTimeout(() => setPressReleaseCopied(null), 2000);
+      setContentCopied(key);
+      setTimeout(() => setContentCopied(null), 2000);
     } catch (err) {
       console.error('Copy failed:', err);
     }
@@ -444,13 +479,37 @@ export default function Home() {
                       <p className="text-slate-600 text-sm leading-relaxed mb-4">
                         {hook.explanation}
                       </p>
-                      <div className="flex flex-wrap items-center gap-4">
+
+                      {hook.sources && hook.sources.length > 0 && (
+                        <div className="mb-4">
+                          <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">
+                            Bronnen
+                          </p>
+                          <ul className="space-y-1">
+                            {hook.sources.slice(0, 3).map((source, sIdx) => (
+                              <li key={sIdx}>
+                                <a
+                                  href={source.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-start gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 hover:underline"
+                                >
+                                  <ExternalLink className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                                  <span className="break-words">{source.title}</span>
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      <div className="flex flex-wrap items-center gap-3 mb-4">
                         <button
                           onClick={() => copyToClipboard(
                             `${hook.hook}\n\n${hook.explanation}`,
                             index
                           )}
-                          className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                          className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 font-medium"
                         >
                           {copiedIndex === index ? (
                             <>
@@ -460,66 +519,106 @@ export default function Home() {
                           ) : (
                             <>
                               <Copy className="w-4 h-4" />
-                              <span>Kopieer deze hook</span>
-                            </>
-                          )}
-                        </button>
-                        <button
-                          onClick={() => generatePressRelease(hook, index)}
-                          disabled={pressReleaseLoading[index]}
-                          className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 disabled:text-slate-400 disabled:cursor-not-allowed font-medium"
-                        >
-                          {pressReleaseLoading[index] ? (
-                            <>
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              <span>Persbericht schrijven...</span>
-                            </>
-                          ) : (
-                            <>
-                              <FileText className="w-4 h-4" />
-                              <span>
-                                {pressReleases[index] ? 'Opnieuw genereren' : 'Maak persbericht-aanzet'}
-                              </span>
+                              <span>Kopieer hook</span>
                             </>
                           )}
                         </button>
                       </div>
 
-                      {pressReleaseErrors[index] && (
-                        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                          {pressReleaseErrors[index]}
+                      <div className="border-t border-slate-100 pt-4">
+                        <p className="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-wide">
+                          Maak content van deze hook
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {CONTENT_TYPES.map((ct) => {
+                            const key = contentKey(index, ct.id);
+                            const isActive = activeContentType[index] === ct.id;
+                            const isLoadingType = contentLoading[key];
+                            const Icon = ct.icon;
+                            return (
+                              <button
+                                key={ct.id}
+                                onClick={() => handleContentTypeClick(hook, index, ct.id)}
+                                disabled={isLoadingType}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors border ${
+                                  isActive
+                                    ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'
+                                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                                } disabled:opacity-60 disabled:cursor-not-allowed`}
+                              >
+                                {isLoadingType ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Icon className="w-4 h-4" />
+                                )}
+                                <span>{ct.label}</span>
+                              </button>
+                            );
+                          })}
                         </div>
-                      )}
+                      </div>
 
-                      {pressReleases[index] && (
-                        <div className="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                          <div className="flex items-center justify-between mb-3">
-                            <h4 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                              <FileText className="w-4 h-4" />
-                              Persbericht-aanzet
-                            </h4>
-                            <button
-                              onClick={() => copyPressRelease(pressReleases[index], index)}
-                              className="flex items-center gap-2 text-xs text-indigo-600 hover:text-indigo-700 font-medium"
-                            >
-                              {pressReleaseCopied === index ? (
-                                <>
-                                  <Check className="w-3.5 h-3.5" />
-                                  <span>Gekopieerd!</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="w-3.5 h-3.5" />
-                                  <span>Kopieer</span>
-                                </>
-                              )}
-                            </button>
-                          </div>
-                          <pre className="whitespace-pre-wrap font-sans text-sm text-slate-700 leading-relaxed">
-                            {pressReleases[index]}
-                          </pre>
-                        </div>
-                      )}
+                      {(() => {
+                        const activeType = activeContentType[index];
+                        if (!activeType) return null;
+                        const key = contentKey(index, activeType);
+                        const text = generatedContent[key];
+                        const err = contentErrors[key];
+                        const loadingType = contentLoading[key];
+                        const def = CONTENT_TYPES.find((c) => c.id === activeType);
+                        const ActiveIcon = def?.icon;
+
+                        if (loadingType) {
+                          return (
+                            <div className="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-lg flex items-center gap-3 text-sm text-slate-600">
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span>{def?.label} schrijven...</span>
+                            </div>
+                          );
+                        }
+
+                        if (err) {
+                          return (
+                            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                              {err}
+                            </div>
+                          );
+                        }
+
+                        if (text) {
+                          return (
+                            <div className="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                              <div className="flex items-center justify-between mb-3">
+                                <h4 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                  {ActiveIcon && <ActiveIcon className="w-4 h-4" />}
+                                  {def?.label}
+                                </h4>
+                                <button
+                                  onClick={() => copyContent(text, key)}
+                                  className="flex items-center gap-2 text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+                                >
+                                  {contentCopied === key ? (
+                                    <>
+                                      <Check className="w-3.5 h-3.5" />
+                                      <span>Gekopieerd!</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Copy className="w-3.5 h-3.5" />
+                                      <span>Kopieer</span>
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                              <pre className="whitespace-pre-wrap font-sans text-sm text-slate-700 leading-relaxed">
+                                {text}
+                              </pre>
+                            </div>
+                          );
+                        }
+
+                        return null;
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -534,10 +633,11 @@ export default function Home() {
                   setSector('');
                   setError('');
                   setGenerationContext(null);
-                  setPressReleases({});
-                  setPressReleaseLoading({});
-                  setPressReleaseErrors({});
-                  setPressReleaseCopied(null);
+                  setGeneratedContent({});
+                  setContentLoading({});
+                  setContentErrors({});
+                  setActiveContentType({});
+                  setContentCopied(null);
                 }}
                 className="text-slate-500 hover:text-slate-700 text-sm font-medium"
               >
@@ -552,7 +652,15 @@ export default function Home() {
       <footer className="border-t border-slate-200 mt-16">
         <div className="max-w-4xl mx-auto px-4 py-6">
           <p className="text-center text-sm text-slate-400">
-            HookFinder MVP — Gegenereerd door Kimi Claw
+            Product van{' '}
+            <a
+              href="https://newfound.agency"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-indigo-600 hover:text-indigo-700 hover:underline"
+            >
+              Newfound
+            </a>
           </p>
         </div>
       </footer>
