@@ -97,6 +97,7 @@ Regels:
 - Combineer altijd het merkperspectief met actuele context. Een hook zonder actuele haak is te zwak.
 - Als er onvoldoende informatie is voor een sterke hook: benoem dat eerlijk in de toelichting.
 - Schrijf in het Nederlands, tenzij de input volledig in het Engels is.
+- Genereer 5 hooks waarbij elke hook een duidelijk andere invalshoek heeft. Varieer tussen: merkpositionering, maatschappelijke relevantie, sector-trends, business-angle en human interest. Maximaal 2 hooks mogen over hetzelfde nieuws-item gaan.
 
 Geef de output in het volgende JSON formaat:
 {

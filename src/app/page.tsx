@@ -216,7 +216,7 @@ export default function Home() {
                 htmlFor="sector" 
                 className="block text-sm font-medium text-slate-700 mb-2"
               >
-                Sector of thema <span className="text-slate-400 font-normal">(optioneel)</span>
+                Thema of invalshoek <span className="text-slate-400 font-normal">(optioneel)</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -227,7 +227,7 @@ export default function Home() {
                   id="sector"
                   value={sector}
                   onChange={(e) => setSector(e.target.value)}
-                  placeholder="bijv. technologie, duurzaamheid, gezondheid"
+                  placeholder="bijv. duurzaamheid, gelijkwaardigheid, sport, klimaat, innovatie"
                   className="block w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   disabled={isLoading}
                 />
