@@ -1,26 +1,53 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: GreedCondensed;
+  src: url(/fonts/GreedCondensed-TRIAL-Bold.otf);
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: Satoshi;
+  src: url(/fonts/Satoshi-Regular.otf);
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: Satoshi;
+  src: url(/fonts/Satoshi-Light.otf);
+  font-weight: 300;
+}
+
+@font-face {
+  font-family: KansasNew;
+  src: url(/fonts/kansasnew-medium.otf);
+  font-weight: 500;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #202020;
+  --foreground: #ffffff;
+  --accent: #ddb3ff;
+  --card: #2a2a2a;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-input: rgba(255, 255, 255, 0.3);
+  --primary: #0e6eff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: Satoshi, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Satoshi, sans-serif;
+  font-weight: 300;
+}
+
+select option {
+  background: #2a2a2a;
+  color: #fff;
 }

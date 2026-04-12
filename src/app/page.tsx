@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Copy, Check, Sparkles, Newspaper, Globe, Loader2, FileText, Megaphone, Mail, Link2, ExternalLink } from 'lucide-react';
+import { Search, Copy, Check, Newspaper, Globe, Loader2, FileText, Megaphone, Mail, Link2, ExternalLink } from 'lucide-react';
 
 interface Source {
   title: string;
@@ -308,36 +308,53 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen" style={{ background: '#202020' }}>
+      {/* Gradient Navbar */}
+      <nav
+        className="flex items-center px-6"
+        style={{
+          height: '72px',
+          background: 'linear-gradient(90deg, #0e6eff, #7b61ff 35%, #ddb3ff 65%, #e8a0bf)',
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://newfound.agency/wp-content/uploads/2025/06/Logo_newfound.svg"
+          alt="Newfound"
+          className="h-8"
+        />
+      </nav>
+
       {/* Header */}
-      <header className="bg-white border-b border-slate-200">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900">HookFinder</h1>
-              <p className="text-sm text-slate-500">PR-hooks generator voor bureaus</p>
-            </div>
-          </div>
-        </div>
+      <header className="max-w-4xl mx-auto px-4 pt-12 pb-8 text-center">
+        <h1
+          className="text-5xl md:text-6xl uppercase tracking-wide mb-2"
+          style={{ fontFamily: 'GreedCondensed, sans-serif', fontWeight: 700 }}
+        >
+          HOOKFINDER
+        </h1>
+        <p
+          className="text-lg opacity-70"
+          style={{ fontFamily: 'KansasNew, serif', fontWeight: 500 }}
+        >
+          PR-hooks generator voor bureaus
+        </p>
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-12">
         {/* Input Section */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-8">
+        <div className="rounded-2xl p-8 mb-8" style={{ background: '#2a2a2a', border: '1px solid rgba(255,255,255,0.1)' }}>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label 
-                htmlFor="input" 
-                className="block text-sm font-medium text-slate-700 mb-2"
+              <label
+                htmlFor="input"
+                className="block text-sm font-medium text-white/80 mb-2"
               >
-                URL of bedrijfsnaam <span className="text-red-500">*</span>
+                URL of bedrijfsnaam <span style={{ color: '#ddb3ff' }}>*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Globe className="h-5 w-5 text-slate-400" />
+                  <Globe className="h-5 w-5 text-white/40" />
                 </div>
                 <input
                   type="text"
@@ -345,22 +362,23 @@ export default function Home() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="https://voorbeeld.nl of Bedrijfsnaam"
-                  className="block w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  className="block w-full pl-12 pr-4 py-4 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+                  style={{ background: '#2a2a2a', border: '1px solid rgba(255,255,255,0.3)', focusRingColor: '#0e6eff' } as React.CSSProperties}
                   disabled={isLoading}
                 />
               </div>
             </div>
 
             <div>
-              <label 
-                htmlFor="sector" 
-                className="block text-sm font-medium text-slate-700 mb-2"
+              <label
+                htmlFor="sector"
+                className="block text-sm font-medium text-white/80 mb-2"
               >
-                Thema of invalshoek <span className="text-slate-400 font-normal">(optioneel)</span>
+                Thema of invalshoek <span className="text-white/40 font-normal">(optioneel)</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Newspaper className="h-5 w-5 text-slate-400" />
+                  <Newspaper className="h-5 w-5 text-white/40" />
                 </div>
                 <input
                   type="text"
@@ -368,7 +386,8 @@ export default function Home() {
                   value={sector}
                   onChange={(e) => setSector(e.target.value)}
                   placeholder="bijv. duurzaamheid, gelijkwaardigheid, sport, klimaat, innovatie"
-                  className="block w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  className="block w-full pl-12 pr-4 py-4 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+                  style={{ background: '#2a2a2a', border: '1px solid rgba(255,255,255,0.3)' }}
                   disabled={isLoading}
                 />
               </div>
@@ -376,18 +395,14 @@ export default function Home() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label
-                  htmlFor="lang"
-                  className="block text-sm font-medium text-slate-700 mb-2"
-                >
-                  Bronnen
-                </label>
+                <label htmlFor="lang" className="block text-sm font-medium text-white/80 mb-2">Bronnen</label>
                 <select
                   id="lang"
                   value={lang}
                   onChange={(e) => setLang(e.target.value as LangFilter)}
                   disabled={isLoading}
-                  className="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:opacity-60"
+                  className="block w-full px-4 py-3 rounded-xl text-white focus:outline-none focus:ring-2 focus:border-transparent transition-all disabled:opacity-60"
+                  style={{ background: '#2a2a2a', border: '1px solid rgba(255,255,255,0.3)' }}
                 >
                   <option value="international">Internationaal</option>
                   <option value="nl">Alleen Nederland</option>
@@ -396,18 +411,14 @@ export default function Home() {
               </div>
 
               <div>
-                <label
-                  htmlFor="period"
-                  className="block text-sm font-medium text-slate-700 mb-2"
-                >
-                  Periode
-                </label>
+                <label htmlFor="period" className="block text-sm font-medium text-white/80 mb-2">Periode</label>
                 <select
                   id="period"
                   value={period}
                   onChange={(e) => setPeriod(e.target.value as PeriodFilter)}
                   disabled={isLoading}
-                  className="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:opacity-60"
+                  className="block w-full px-4 py-3 rounded-xl text-white focus:outline-none focus:ring-2 focus:border-transparent transition-all disabled:opacity-60"
+                  style={{ background: '#2a2a2a', border: '1px solid rgba(255,255,255,0.3)' }}
                 >
                   <option value="week">Afgelopen week</option>
                   <option value="day">Afgelopen 24 uur</option>
@@ -416,18 +427,14 @@ export default function Home() {
               </div>
 
               <div>
-                <label
-                  htmlFor="mediaType"
-                  className="block text-sm font-medium text-slate-700 mb-2"
-                >
-                  Type bronnen
-                </label>
+                <label htmlFor="mediaType" className="block text-sm font-medium text-white/80 mb-2">Type bronnen</label>
                 <select
                   id="mediaType"
                   value={mediaType}
                   onChange={(e) => setMediaType(e.target.value as MediaTypeFilter)}
                   disabled={isLoading}
-                  className="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:opacity-60"
+                  className="block w-full px-4 py-3 rounded-xl text-white focus:outline-none focus:ring-2 focus:border-transparent transition-all disabled:opacity-60"
+                  style={{ background: '#2a2a2a', border: '1px solid rgba(255,255,255,0.3)' }}
                 >
                   <option value="all">Alle bronnen</option>
                   <option value="vakbladen">Vakbladen</option>
@@ -437,7 +444,7 @@ export default function Home() {
             </div>
 
             {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+              <div className="p-4 rounded-xl text-sm" style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5' }}>
                 {error}
               </div>
             )}
@@ -445,7 +452,13 @@ export default function Home() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 py-4 px-6 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors"
+              className="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-xl text-white uppercase tracking-wider transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{
+                background: isLoading ? '#555' : '#0e6eff',
+                fontFamily: 'GreedCondensed, sans-serif',
+                fontWeight: 700,
+                fontSize: '1.1rem',
+              }}
             >
               {isLoading ? (
                 <>
@@ -464,26 +477,27 @@ export default function Home() {
 
         {/* Loading State */}
         {isLoading && (
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-8">
+          <div className="rounded-2xl p-8 mb-8" style={{ background: '#2a2a2a', border: '1px solid rgba(255,255,255,0.1)' }}>
             <div className="flex flex-col items-center">
               <div className="relative w-16 h-16 mb-6">
-                <div className="absolute inset-0 border-4 border-indigo-100 rounded-full"></div>
-                <div 
-                  className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"
+                <div className="absolute inset-0 border-4 rounded-full" style={{ borderColor: 'rgba(221,179,255,0.2)' }}></div>
+                <div
+                  className="absolute inset-0 border-4 rounded-full border-t-transparent animate-spin"
+                  style={{ borderColor: '#ddb3ff', borderTopColor: 'transparent' }}
                 ></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-sm font-semibold text-indigo-600">
+                  <span className="text-sm font-semibold" style={{ color: '#ddb3ff' }}>
                     {loadingStep + 1}/5
                   </span>
                 </div>
               </div>
-              
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+
+              <h3 className="text-lg font-semibold text-white mb-2">
                 {loadingMessages[loadingStep]?.message || 'Bezig...'}
               </h3>
-              
-              <p className="text-slate-500 text-center max-w-md">
-                We analyseren de website, verzamelen actueel nieuws en ontwikkelen 
+
+              <p className="text-white/50 text-center max-w-md">
+                We analyseren de website, verzamelen actueel nieuws en ontwikkelen
                 PR-strategieën specifiek voor dit merk.
               </p>
 
@@ -491,9 +505,8 @@ export default function Home() {
                 {loadingMessages.map((_, index) => (
                   <div
                     key={index}
-                    className={`w-2 h-2 rounded-full transition-colors ${
-                      index <= loadingStep ? 'bg-indigo-600' : 'bg-slate-200'
-                    }`}
+                    className="w-2 h-2 rounded-full transition-colors"
+                    style={{ background: index <= loadingStep ? '#ddb3ff' : 'rgba(255,255,255,0.15)' }}
                   />
                 ))}
               </div>
@@ -506,18 +519,19 @@ export default function Home() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">
+                <h2 className="text-xl font-bold text-white">
                   5 PR-hooks gevonden
                 </h2>
                 {usedFallback && (
-                  <p className="text-sm text-amber-600 mt-1">
+                  <p className="text-sm mt-1" style={{ color: '#ddb3ff' }}>
                     Website kon niet worden gescraped. Resultaten gebaseerd op nieuws en bedrijfsnaam.
                   </p>
                 )}
               </div>
               <button
                 onClick={copyAllHooks}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors text-sm font-medium"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium text-white/70 hover:text-white"
+                style={{ background: 'rgba(255,255,255,0.08)' }}
               >
                 {copiedIndex === -1 ? (
                   <>
@@ -537,23 +551,27 @@ export default function Home() {
               {hooks.map((hook, index) => (
                 <div
                   key={index}
-                  className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow"
+                  className="rounded-xl p-6 transition-all hover:brightness-110"
+                  style={{ background: '#2a2a2a', border: '1px solid rgba(255,255,255,0.1)' }}
                 >
                   <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center font-bold text-sm">
+                    <div
+                      className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm"
+                      style={{ background: 'rgba(221,179,255,0.15)', color: '#ddb3ff' }}
+                    >
                       {index + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-slate-900 mb-3 leading-relaxed">
+                      <h3 className="text-lg font-semibold text-white mb-3 leading-relaxed">
                         {hook.hook}
                       </h3>
-                      <p className="text-slate-600 text-sm leading-relaxed mb-4">
+                      <p className="text-white/60 text-sm leading-relaxed mb-4">
                         {hook.explanation}
                       </p>
 
                       {hook.sources && hook.sources.length > 0 && (
                         <div className="mb-4">
-                          <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">
+                          <p className="text-xs font-semibold text-white/40 mb-2 uppercase tracking-wide">
                             Bronnen
                           </p>
                           <ul className="space-y-1">
@@ -563,7 +581,8 @@ export default function Home() {
                                   href={source.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-start gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 hover:underline"
+                                  className="inline-flex items-start gap-1.5 text-sm hover:underline"
+                                  style={{ color: '#ddb3ff' }}
                                 >
                                   <ExternalLink className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                                   <span className="break-words">{source.title}</span>
@@ -580,7 +599,7 @@ export default function Home() {
                             `${hook.hook}\n\n${hook.explanation}`,
                             index
                           )}
-                          className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 font-medium"
+                          className="flex items-center gap-2 text-sm text-white/50 hover:text-white font-medium"
                         >
                           {copiedIndex === index ? (
                             <>
@@ -596,8 +615,8 @@ export default function Home() {
                         </button>
                       </div>
 
-                      <div className="border-t border-slate-100 pt-4">
-                        <p className="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-wide">
+                      <div className="pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                        <p className="text-xs font-semibold text-white/40 mb-3 uppercase tracking-wide">
                           Maak content van deze hook
                         </p>
                         <div className="flex flex-wrap gap-2">
@@ -611,11 +630,12 @@ export default function Home() {
                                 key={ct.id}
                                 onClick={() => handleContentTypeClick(hook, index, ct.id)}
                                 disabled={isLoadingType}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors border ${
-                                  isActive
-                                    ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'
-                                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                                } disabled:opacity-60 disabled:cursor-not-allowed`}
+                                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                                style={{
+                                  background: isActive ? '#0e6eff' : 'rgba(255,255,255,0.06)',
+                                  color: isActive ? '#fff' : 'rgba(255,255,255,0.7)',
+                                  border: isActive ? '1px solid #0e6eff' : '1px solid rgba(255,255,255,0.15)',
+                                }}
                               >
                                 {isLoadingType ? (
                                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -641,7 +661,7 @@ export default function Home() {
 
                         if (loadingType) {
                           return (
-                            <div className="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-lg flex items-center gap-3 text-sm text-slate-600">
+                            <div className="mt-4 p-4 rounded-lg flex items-center gap-3 text-sm text-white/50" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
                               <Loader2 className="w-4 h-4 animate-spin" />
                               <span>{def?.label} schrijven...</span>
                             </div>
@@ -650,7 +670,7 @@ export default function Home() {
 
                         if (err) {
                           return (
-                            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                            <div className="mt-4 p-3 rounded-lg text-sm" style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5' }}>
                               {err}
                             </div>
                           );
@@ -658,15 +678,16 @@ export default function Home() {
 
                         if (text) {
                           return (
-                            <div className="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div className="mt-4 p-4 rounded-lg" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
                               <div className="flex items-center justify-between mb-3">
-                                <h4 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                <h4 className="text-sm font-semibold text-white/80 flex items-center gap-2">
                                   {ActiveIcon && <ActiveIcon className="w-4 h-4" />}
                                   {def?.label}
                                 </h4>
                                 <button
                                   onClick={() => copyContent(text, key)}
-                                  className="flex items-center gap-2 text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+                                  className="flex items-center gap-2 text-xs font-medium"
+                                  style={{ color: '#ddb3ff' }}
                                 >
                                   {contentCopied === key ? (
                                     <>
@@ -681,7 +702,7 @@ export default function Home() {
                                   )}
                                 </button>
                               </div>
-                              <pre className="whitespace-pre-wrap font-sans text-sm text-slate-700 leading-relaxed">
+                              <pre className="whitespace-pre-wrap font-sans text-sm text-white/70 leading-relaxed">
                                 {text}
                               </pre>
                             </div>
@@ -710,7 +731,7 @@ export default function Home() {
                   setActiveContentType({});
                   setContentCopied(null);
                 }}
-                className="text-slate-500 hover:text-slate-700 text-sm font-medium"
+                className="text-white/40 hover:text-white text-sm font-medium"
               >
                 Nieuwe zoekopdracht starten
               </button>
@@ -720,15 +741,16 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 mt-16">
+      <footer className="mt-16" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
         <div className="max-w-4xl mx-auto px-4 py-6">
-          <p className="text-center text-sm text-slate-400">
-            Product van{' '}
+          <p className="text-center text-sm text-white/30">
+            Een product van{' '}
             <a
               href="https://newfound.agency"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-indigo-600 hover:text-indigo-700 hover:underline"
+              style={{ color: '#ddb3ff' }}
+              className="hover:underline"
             >
               Newfound
             </a>
