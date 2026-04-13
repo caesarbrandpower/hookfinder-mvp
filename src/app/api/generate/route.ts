@@ -86,28 +86,29 @@ function buildPrompt(
   const hasNewsData = newsData && newsData.results && newsData.results.length > 0;
   const hasGoogleNews = googleNews && googleNews.length > 0;
 
-  let prompt = `Je werkt als een ervaren PR-strateeg volgens bewezen methodieken:
+  let prompt = `Je bent een ervaren PR-strateeg. Je werkt in twee stappen:
 
-1. NEWSJACKING (David Meerman Scott): Zoek het exacte moment waarop dit merk kan inhaken op een lopend nieuwsverhaal. Timing is alles - de haak moet nu relevant zijn.
-2. SO WHAT TEST (Michael Smart): Elke hook moet direct beantwoorden waarom dit nu relevant is voor een journalist. Als je "en dan?" denkt, is hij niet sterk genoeg.
-3. LEZER CENTRAAL (Ann Handley): Schrijf altijd vanuit het perspectief van de journalist of lezer, nooit vanuit het merk.
-4. INVERTED PYRAMID: Bij persberichten altijd het belangrijkste eerst. De nieuwshaak in de eerste zin, niet de bedrijfsintroductie.
+STAP 1 - BEOORDEEL:
+Gebruik deze methodieken als intern filter om te bepalen welke hooks sterk zijn:
+- Newsjacking (David Meerman Scott): is er een actueel nieuwsmoment waarop dit merk nu kan inhaken?
+- So What Test (Michael Smart): is de relevantie voor een journalist direct duidelijk?
+- Lezer centraal (Ann Handley): gaat de hook over de lezer of over het merk?
+Selecteer alleen hooks die op alle drie de filters scoren.
 
-Je krijgt twee soorten input: (1) tekst van de website van een merk, en (2) actueel nieuws en trending topics rond dat merk of die sector.
+STAP 2 - SCHRIJF:
+Schrijf elke hook als twee aparte onderdelen:
+- HOOK: een scherpe zin van maximaal 12 woorden. Triggert. Zet aan tot lezen. Geen uitleg in de hook zelf.
+- TOELICHTING: twee zinnen. Waarom is dit nu relevant? Voor welk medium of journalist?
 
-Genereer op basis van deze combinatie 5 PR-hooks voor een PR-bureau dat dit merk als klant heeft.
-
-Elke hook bestaat uit:
-- De hook: één krachtige zin die een journalist aan het denken zet. Concreet, actueel, nieuwswaardig.
-- Toelichting: twee zinnen. Waarom is dit nu relevant? Voor welk type medium of journalist is dit interessant?
-- Bronnen: een lijst van maximaal 3 nieuwsbronnen (titel + url) uit de meegeleverde artikelen die daadwerkelijk de basis vormen voor deze hook. Als de hook niet op nieuws gebaseerd is, laat de lijst leeg.
+Bronnen:
+- Voeg per hook een lijst van maximaal 3 nieuwsbronnen (titel + url) toe uit de meegeleverde artikelen die daadwerkelijk de basis vormen voor deze hook. Als de hook niet op nieuws gebaseerd is, laat de lijst leeg.
+- Gebruik voor "sources" alleen artikelen die letterlijk in de input hieronder staan. Verzin geen titels of urls. Kopieer de titel en url exact.
 
 Regels:
-- Maak de hooks specifiek voor dit merk en dit moment. Geen generieke PR-adviezen.
-- Combineer altijd het merkperspectief met actuele context. Een hook zonder actuele haak is te zwak.
-- Als er onvoldoende informatie is voor een sterke hook: benoem dat eerlijk in de toelichting.
-- Schrijf in het Nederlands, tenzij de input volledig in het Engels is.
-- Genereer 5 hooks waarbij elke hook een duidelijk andere invalshoek heeft. Varieer tussen: merkpositionering, maatschappelijke relevantie, sector-trends, business-angle en human interest. Maximaal 2 hooks mogen over hetzelfde nieuws-item gaan.
+- Maximaal 2 hooks mogen over hetzelfde nieuws-item gaan
+- Varieer tussen: merkpositionering, maatschappelijke relevantie, sector-trends, business-angle, human interest
+- Schrijf in het Nederlands, tenzij de input volledig in het Engels is
+- Vul nooit iets in dat je niet kunt onderbouwen vanuit de aangeleverde bronnen
 
 Geef de output in het volgende JSON formaat:
 {
@@ -121,8 +122,6 @@ Geef de output in het volgende JSON formaat:
     }
   ]
 }
-
-Gebruik voor "sources" alleen artikelen die letterlijk in de lijst hieronder staan. Verzin geen titels of urls. Kopieer de titel en url exact zoals ze in de input staan. Maximaal 3 bronnen per hook.
 
 `;
 

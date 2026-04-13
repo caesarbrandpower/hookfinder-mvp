@@ -325,7 +325,7 @@ export default function Home() {
         <img
           src="https://newfound.agency/wp-content/uploads/2025/06/Logo_newfound.svg"
           alt="Newfound"
-          style={{ height: '14px' }}
+          style={{ height: '20px' }}
         />
       </nav>
 
@@ -718,9 +718,23 @@ export default function Home() {
                                   )}
                                 </button>
                               </div>
-                              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed" style={{ color: 'rgba(26,26,26,0.75)' }}>
-                                {text}
-                              </pre>
+                              <div className="font-sans text-sm leading-relaxed" style={{ color: 'rgba(26,26,26,0.75)' }}>
+                                {text.split('\n').map((line, i) => {
+                                  const trimmed = line.trim();
+                                  const isLabel = trimmed.length > 0 && trimmed === trimmed.toUpperCase() && /^[A-Z\s\-]+$/.test(trimmed);
+                                  if (isLabel) {
+                                    return (
+                                      <p key={i} className="uppercase mt-4 mb-1" style={{ fontSize: '10px', color: '#999999', letterSpacing: '0.05em' }}>
+                                        {trimmed}
+                                      </p>
+                                    );
+                                  }
+                                  if (trimmed === '') {
+                                    return <br key={i} />;
+                                  }
+                                  return <p key={i} className="mb-1">{line}</p>;
+                                })}
+                              </div>
                             </div>
                           );
                         }
