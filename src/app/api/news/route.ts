@@ -66,16 +66,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Haal Tavily en Google News parallel op — combineer merknaam + thema
-    const combinedQuery = sector ? `${query} ${sector}` : query;
-    const tavilyPromise = fetchTavily(combinedQuery, sector, lang, period, mediaType);
-    const googleNewsPromise = fetchGoogleNews(combinedQuery);
+    // Twee parallelle zoekopdrachten: merkspecifiek + sectorcontext
+    const sectorQuery = sector ? `${sector} actueel trends` : `${query} actueel trends`;
+    const googleQuery = sector ? `${sector} actueel` : query;
 
-    const [tavilyData, googleNews] = await Promise.all([tavilyPromise, googleNewsPromise]);
+    const [brandNews, sectorNews, googleNews] = await Promise.all([
+      fetchTavily(query, undefined, lang, period, mediaType),
+      sector ? fetchTavily(sectorQuery, undefined, lang, period, mediaType) : Promise.resolve({ results: [], answer: '' }),
+      fetchGoogleNews(googleQuery),
+    ]);
 
     return NextResponse.json({
-      results: tavilyData.results,
-      answer: tavilyData.answer,
+      brandNews,
+      sectorNews,
       googleNews,
     });
   } catch (error) {

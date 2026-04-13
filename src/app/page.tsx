@@ -163,11 +163,13 @@ export default function Home() {
         }),
       });
 
-      let newsData: NewsData = { results: [], answer: '' };
+      let brandNews: NewsData = { results: [], answer: '' };
+      let sectorNews: NewsData = { results: [], answer: '' };
       let googleNews: Array<{ title: string; url: string; pubDate: string }> = [];
       if (newsResponse.ok) {
         const newsJson = await newsResponse.json();
-        newsData = { results: newsJson.results || [], answer: newsJson.answer || '' };
+        brandNews = newsJson.brandNews || { results: [], answer: '' };
+        sectorNews = newsJson.sectorNews || { results: [], answer: '' };
         googleNews = newsJson.googleNews || [];
       }
 
@@ -178,7 +180,8 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           websiteContent,
-          newsData,
+          brandNews,
+          sectorNews,
           googleNews,
           companyName,
           sector: sector || undefined,
@@ -199,7 +202,7 @@ export default function Home() {
         setUsedFallback(fallbackUsed);
         setGenerationContext({
           websiteContent,
-          newsData,
+          newsData: { results: [...brandNews.results, ...sectorNews.results], answer: brandNews.answer || sectorNews.answer },
           companyName,
           sector: sector || undefined,
         });

@@ -9,7 +9,7 @@ const anthropic = ANTHROPIC_API_KEY && ANTHROPIC_API_KEY !== 'your_anthropic_api
 
 export async function POST(request: NextRequest) {
   try {
-    const { websiteContent, newsData, googleNews, companyName, sector } = await request.json();
+    const { websiteContent, brandNews, sectorNews, googleNews, companyName, sector } = await request.json();
 
     if (!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY === 'your_anthropic_api_key_here') {
       return NextResponse.json(
@@ -26,11 +26,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Normaliseer input
-    const safeNewsData = newsData && newsData.results ? newsData : { results: [], answer: '' };
+    const safeBrandNews = brandNews && brandNews.results ? brandNews : { results: [], answer: '' };
+    const safeSectorNews = sectorNews && sectorNews.results ? sectorNews : { results: [], answer: '' };
     const safeGoogleNews = Array.isArray(googleNews) ? googleNews : [];
 
     // Bouw de prompt
-    const prompt = buildPrompt(websiteContent || '', safeNewsData, safeGoogleNews, companyName, sector);
+    const prompt = buildPrompt(websiteContent || '', safeBrandNews, safeSectorNews, safeGoogleNews, companyName, sector);
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
@@ -110,48 +111,50 @@ export async function POST(request: NextRequest) {
 
 function buildPrompt(
   websiteContent: string,
-  newsData: { results: Array<{ title: string; content: string; url: string }>; answer: string },
+  brandNews: { results: Array<{ title: string; content: string; url: string }>; answer: string },
+  sectorNews: { results: Array<{ title: string; content: string; url: string }>; answer: string },
   googleNews: Array<{ title: string; url: string; pubDate: string }> | undefined,
   companyName: string,
   sector?: string
 ): string {
   const hasWebsiteContent = websiteContent && websiteContent.length > 0;
-  const hasNewsData = newsData && newsData.results && newsData.results.length > 0;
+  const hasBrandNews = brandNews && brandNews.results && brandNews.results.length > 0;
+  const hasSectorNews = sectorNews && sectorNews.results && sectorNews.results.length > 0;
   const hasGoogleNews = googleNews && googleNews.length > 0;
 
-  let prompt = `Je bent een ervaren PR-strateeg. Je werkt in twee stappen:
+  let prompt = `Je bent een ervaren PR-strateeg. Je taak is om voor een PR-bureau actuele haakjes te vinden waarop een merk kan inhaken.
 
-STAP 1 - BEOORDEEL:
-Gebruik deze methodieken als intern filter om te bepalen welke hooks sterk zijn:
-- Newsjacking (David Meerman Scott): is er een actueel nieuwsmoment waarop dit merk nu kan inhaken?
-- So What Test (Michael Smart): is de relevantie voor een journalist direct duidelijk?
-- Lezer centraal (Ann Handley): gaat de hook over de lezer of over het merk?
-Selecteer alleen hooks die op alle drie de filters scoren.
+JE WERKT IN DRIE STAPPEN:
 
-STAP 2 - SCHRIJF:
-Schrijf elke hook als twee aparte onderdelen:
-- HOOK: een scherpe zin van maximaal 12 woorden. Triggert. Zet aan tot lezen. Geen uitleg in de hook zelf.
-- TOELICHTING: twee zinnen. Waarom is dit nu relevant? Voor welk medium of journalist?
+STAP 1 — SCAN DE BRONNEN:
+Je krijgt twee soorten input:
+- MERKNIEUWS: nieuws waar het merk zelf in voorkomt
+- SECTORCONTEXT: actuele trends en nieuws in de sector
+
+STAP 2 — SELECTEER DE STERKSTE HAAKJES:
+Gebruik deze filters om te beoordelen welk nieuws een sterke hook oplevert:
+- Newsjacking (David Meerman Scott): is er een actueel moment waarop het merk nu kan inhaken?
+- So What Test (Michael Smart): is direct duidelijk waarom dit relevant is voor een journalist?
+- Lezer centraal (Ann Handley): gaat de hook over de lezer, niet over het merk?
+
+STAP 3 — SCHRIJF DE HOOKS:
+Schrijf 5 hooks. Gebruik hierbij deze prioriteitvolgorde:
+1. Eerst: hooks gebaseerd op MERKNIEUWS waar het merk al in voorkomt
+2. Daarna: sectorhooks waarbij het merk expliciet kan inhaken op actuele context
+
+Voor elke hook:
+- HOOK: een scherpe zin van maximaal 12 woorden. Triggert. Zet aan tot lezen.
+- TOELICHTING: twee zinnen. Waarom nu relevant? Voor welk medium?
+- Bij sectorhooks: voeg toe "Sectorhaak: [merknaam] kan hierop inhaken omdat..."
+
+Als er onvoldoende materiaal is voor 5 hooks: schrijf alleen de hooks die echt sterk zijn. Liever 3 sterke hooks dan 5 zwakke.
+
+Schrijf in het Nederlands, tenzij de input volledig in het Engels is.
+Varieer tussen: merkpositionering, maatschappelijke relevantie, sector-trends, business-angle, human interest.
 
 Bronnen:
-- Voeg per hook een lijst van maximaal 3 nieuwsbronnen (titel + url) toe uit de meegeleverde artikelen die daadwerkelijk de basis vormen voor deze hook. Als de hook niet op nieuws gebaseerd is, laat de lijst leeg.
+- Voeg per hook een lijst van maximaal 3 nieuwsbronnen (titel + url) toe uit de meegeleverde artikelen die daadwerkelijk de basis vormen voor deze hook.
 - Gebruik voor "sources" alleen artikelen die letterlijk in de input hieronder staan. Verzin geen titels of urls. Kopieer de titel en url exact.
-
-Regels:
-- Maximaal 2 hooks mogen over hetzelfde nieuws-item gaan
-- Varieer tussen: merkpositionering, maatschappelijke relevantie, sector-trends, business-angle, human interest
-- Schrijf in het Nederlands, tenzij de input volledig in het Engels is
-- Vul nooit iets in dat je niet kunt onderbouwen vanuit de aangeleverde bronnen
-- Vermijd hooks die geen actuele nieuwshaak hebben. Een verhaal dat al jaren bekend is zonder recent nieuws is geen hook. Als een hook alleen op historische feiten gebaseerd is, laat hem dan weg.
-
-MERKCONTROLE — TWEE STAPPEN VERPLICHT:
-
-Stap 1: Scan alle aangeleverde bronnen. Markeer alleen bronnen die het ingevoerde merk expliciet bij naam noemen. Bronnen die het merk niet bij naam noemen zijn niet bruikbaar, ook niet als ze over dezelfde sector gaan.
-
-Stap 2: Schrijf alleen hooks gebaseerd op bronnen die de merkcontrole hebben doorstaan. Als er na de controle minder dan 5 bruikbare bronnen zijn, schrijf dan voor de ontbrekende hooks letterlijk: "Onvoldoende actueel nieuws gevonden over [merknaam] en [thema]." Verzin geen hook om het getal van 5 te halen.
-
-FALLBACK — ALS ER ONVOLDOENDE MERKSPECIFIEK NIEUWS IS:
-Als er na de twee-staps merkcontrole minder dan 5 bruikbare hooks zijn, vul de resterende posities op met sectorhooks. Een sectorhook gaat over een trend, ontwikkeling of nieuws in de sector van het merk dat relevant is voor het merk om op in te haken. Label deze hooks duidelijk met: "Sectorhaak — relevant voor [merknaam] om op in te haken:" gevolgd door de hook. Schrijf daarna in de toelichting waarom dit specifiek voor dit merk een kans is.
 
 Geef de output in het volgende JSON formaat:
 {
@@ -171,7 +174,7 @@ Geef de output in het volgende JSON formaat:
   // Bedrijfsinformatie
   prompt += `BEDRIJFSNAAM: ${companyName}\n`;
   if (sector) {
-    prompt += `SECTOR: ${sector}\n`;
+    prompt += `SECTOR/THEMA: ${sector}\n`;
   }
   prompt += `\n`;
 
@@ -182,25 +185,41 @@ Geef de output in het volgende JSON formaat:
     prompt += `=== WEBSITE CONTENT ===\n[Geen website content beschikbaar]\n\n`;
   }
 
-  // Nieuws data (Tavily)
-  if (hasNewsData) {
-    prompt += `=== ACTUEEL NIEUWS (Tavily) ===\n`;
-    if (newsData.answer) {
-      prompt += `Samenvatting: ${newsData.answer}\n\n`;
+  // Merknieuws
+  if (hasBrandNews) {
+    prompt += `=== MERKNIEUWS: nieuws waar ${companyName} in voorkomt ===\n`;
+    if (brandNews.answer) {
+      prompt += `Samenvatting: ${brandNews.answer}\n\n`;
     }
-    newsData.results.slice(0, 5).forEach((article, index) => {
+    brandNews.results.slice(0, 5).forEach((article, index) => {
       prompt += `Artikel ${index + 1}:\n`;
       prompt += `Titel: ${article.title}\n`;
       prompt += `URL: ${article.url}\n`;
       prompt += `Content: ${article.content?.substring(0, 500) || 'Geen content'}\n\n`;
     });
   } else {
-    prompt += `=== ACTUEEL NIEUWS (Tavily) ===\n[Geen nieuwsdata beschikbaar]\n\n`;
+    prompt += `=== MERKNIEUWS ===\n[Geen merkspecifiek nieuws gevonden voor ${companyName}]\n\n`;
   }
 
-  // Google News RSS
+  // Sectorcontext
+  if (hasSectorNews) {
+    prompt += `=== SECTORCONTEXT: actuele trends en nieuws in de sector ===\n`;
+    if (sectorNews.answer) {
+      prompt += `Samenvatting: ${sectorNews.answer}\n\n`;
+    }
+    sectorNews.results.slice(0, 5).forEach((article, index) => {
+      prompt += `Artikel ${index + 1}:\n`;
+      prompt += `Titel: ${article.title}\n`;
+      prompt += `URL: ${article.url}\n`;
+      prompt += `Content: ${article.content?.substring(0, 500) || 'Geen content'}\n\n`;
+    });
+  } else {
+    prompt += `=== SECTORCONTEXT ===\n[Geen sectornieuws beschikbaar]\n\n`;
+  }
+
+  // Google News RSS (sectorcontext)
   if (hasGoogleNews) {
-    prompt += `=== GOOGLE NEWS ===\n`;
+    prompt += `=== SECTORCONTEXT: Google News ===\n`;
     googleNews.slice(0, 5).forEach((item, index) => {
       prompt += `Artikel ${index + 1}:\n`;
       prompt += `Titel: ${item.title}\n`;
@@ -208,10 +227,10 @@ Geef de output in het volgende JSON formaat:
       prompt += `Datum: ${item.pubDate}\n\n`;
     });
   } else {
-    prompt += `=== GOOGLE NEWS ===\n[Geen Google News resultaten beschikbaar]\n\n`;
+    prompt += `=== SECTORCONTEXT: Google News ===\n[Geen Google News resultaten beschikbaar]\n\n`;
   }
 
-  prompt += `Genereer nu 5 PR-hooks in het gevraagde JSON formaat. Gebruik beide nieuwsbronnen (Tavily en Google News) als context.`;
+  prompt += `Genereer nu PR-hooks in het gevraagde JSON formaat. Prioriteit: eerst merknieuws, dan sectorhooks.`;
 
   return prompt;
 }
