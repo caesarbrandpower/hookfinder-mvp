@@ -328,16 +328,28 @@ export default function Home() {
       {/* Header */}
       <header className="max-w-4xl mx-auto px-4 pt-12 pb-8 text-center">
         <h1
-          className="text-5xl md:text-6xl uppercase tracking-wide mb-2"
+          className="text-5xl md:text-6xl uppercase tracking-wide mb-4"
           style={{ fontFamily: 'GreedCondensed, sans-serif', fontWeight: 700 }}
         >
           HOOKFINDER
         </h1>
         <p
-          className="text-lg opacity-70"
-          style={{ fontFamily: 'KansasNew, serif', fontWeight: 500 }}
+          className="text-xl md:text-2xl mb-2"
+          style={{ fontFamily: 'KansasNew, serif', fontWeight: 500, color: '#fff' }}
         >
-          PR-hooks generator voor bureaus
+          Wat maakt jouw merk vandaag nieuwswaardig?
+        </p>
+        <p
+          className="text-sm md:text-base mb-1 max-w-2xl mx-auto"
+          style={{ fontFamily: 'Satoshi, sans-serif', color: 'rgba(255,255,255,0.6)' }}
+        >
+          Vind de haak en schrijf er direct een persbericht, LinkedIn-post, pitchmail of nieuwsbriefintro mee.
+        </p>
+        <p
+          className="text-xs md:text-sm"
+          style={{ fontFamily: 'Satoshi, sans-serif', color: 'rgba(255,255,255,0.4)' }}
+        >
+          Voor PR-bureaus en communicatieteams
         </p>
       </header>
 
@@ -354,7 +366,7 @@ export default function Home() {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Globe className="h-5 w-5 text-white/40" />
+                  <Globe className="h-5 w-5" style={{ color: '#ddb3ff' }} />
                 </div>
                 <input
                   type="text"
@@ -378,7 +390,7 @@ export default function Home() {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Newspaper className="h-5 w-5 text-white/40" />
+                  <Newspaper className="h-5 w-5" style={{ color: '#ddb3ff' }} />
                 </div>
                 <input
                   type="text"
@@ -401,8 +413,8 @@ export default function Home() {
                   value={lang}
                   onChange={(e) => setLang(e.target.value as LangFilter)}
                   disabled={isLoading}
-                  className="block w-full px-4 py-3 rounded-xl text-white focus:outline-none focus:ring-2 focus:border-transparent transition-all disabled:opacity-60"
-                  style={{ background: '#2a2a2a', border: '1px solid rgba(255,255,255,0.3)' }}
+                  className="block w-full px-4 py-3 text-white focus:outline-none focus:ring-2 focus:border-transparent transition-all disabled:opacity-60"
+                  style={{ background: '#2a2a2a', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px' }}
                 >
                   <option value="international">Internationaal</option>
                   <option value="nl">Alleen Nederland</option>
@@ -417,8 +429,8 @@ export default function Home() {
                   value={period}
                   onChange={(e) => setPeriod(e.target.value as PeriodFilter)}
                   disabled={isLoading}
-                  className="block w-full px-4 py-3 rounded-xl text-white focus:outline-none focus:ring-2 focus:border-transparent transition-all disabled:opacity-60"
-                  style={{ background: '#2a2a2a', border: '1px solid rgba(255,255,255,0.3)' }}
+                  className="block w-full px-4 py-3 text-white focus:outline-none focus:ring-2 focus:border-transparent transition-all disabled:opacity-60"
+                  style={{ background: '#2a2a2a', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px' }}
                 >
                   <option value="week">Afgelopen week</option>
                   <option value="day">Afgelopen 24 uur</option>
@@ -433,8 +445,8 @@ export default function Home() {
                   value={mediaType}
                   onChange={(e) => setMediaType(e.target.value as MediaTypeFilter)}
                   disabled={isLoading}
-                  className="block w-full px-4 py-3 rounded-xl text-white focus:outline-none focus:ring-2 focus:border-transparent transition-all disabled:opacity-60"
-                  style={{ background: '#2a2a2a', border: '1px solid rgba(255,255,255,0.3)' }}
+                  className="block w-full px-4 py-3 text-white focus:outline-none focus:ring-2 focus:border-transparent transition-all disabled:opacity-60"
+                  style={{ background: '#2a2a2a', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px' }}
                 >
                   <option value="all">Alle bronnen</option>
                   <option value="vakbladen">Vakbladen</option>
@@ -551,27 +563,27 @@ export default function Home() {
               {hooks.map((hook, index) => (
                 <div
                   key={index}
-                  className="rounded-xl p-6 transition-all hover:brightness-110"
-                  style={{ background: '#2a2a2a', border: '1px solid rgba(255,255,255,0.1)' }}
+                  className="rounded-xl p-6 transition-all"
+                  style={{ background: '#f5f5f5', border: '1px solid rgba(0,0,0,0.06)' }}
                 >
                   <div className="flex items-start gap-4">
                     <div
                       className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm"
-                      style={{ background: 'rgba(221,179,255,0.15)', color: '#ddb3ff' }}
+                      style={{ background: 'rgba(123,97,255,0.12)', color: '#7b61ff' }}
                     >
                       {index + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-white mb-3 leading-relaxed">
+                      <h3 className="text-lg font-semibold mb-3 leading-relaxed" style={{ color: '#1a1a1a' }}>
                         {hook.hook}
                       </h3>
-                      <p className="text-white/60 text-sm leading-relaxed mb-4">
+                      <p className="text-sm leading-relaxed mb-4" style={{ color: 'rgba(26,26,26,0.6)' }}>
                         {hook.explanation}
                       </p>
 
                       {hook.sources && hook.sources.length > 0 && (
                         <div className="mb-4">
-                          <p className="text-xs font-semibold text-white/40 mb-2 uppercase tracking-wide">
+                          <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'rgba(26,26,26,0.4)' }}>
                             Bronnen
                           </p>
                           <ul className="space-y-1">
@@ -582,7 +594,7 @@ export default function Home() {
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline-flex items-start gap-1.5 text-sm hover:underline"
-                                  style={{ color: '#ddb3ff' }}
+                                  style={{ color: '#7b61ff' }}
                                 >
                                   <ExternalLink className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                                   <span className="break-words">{source.title}</span>
@@ -599,7 +611,8 @@ export default function Home() {
                             `${hook.hook}\n\n${hook.explanation}`,
                             index
                           )}
-                          className="flex items-center gap-2 text-sm text-white/50 hover:text-white font-medium"
+                          className="flex items-center gap-2 text-sm font-medium"
+                          style={{ color: 'rgba(26,26,26,0.5)' }}
                         >
                           {copiedIndex === index ? (
                             <>
@@ -615,8 +628,8 @@ export default function Home() {
                         </button>
                       </div>
 
-                      <div className="pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                        <p className="text-xs font-semibold text-white/40 mb-3 uppercase tracking-wide">
+                      <div className="pt-4" style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+                        <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'rgba(26,26,26,0.4)' }}>
                           Maak content van deze hook
                         </p>
                         <div className="flex flex-wrap gap-2">
@@ -632,9 +645,9 @@ export default function Home() {
                                 disabled={isLoadingType}
                                 className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                                 style={{
-                                  background: isActive ? '#0e6eff' : 'rgba(255,255,255,0.06)',
-                                  color: isActive ? '#fff' : 'rgba(255,255,255,0.7)',
-                                  border: isActive ? '1px solid #0e6eff' : '1px solid rgba(255,255,255,0.15)',
+                                  background: isActive ? '#7b61ff' : '#fff',
+                                  color: isActive ? '#fff' : '#1a1a1a',
+                                  border: isActive ? '1px solid #7b61ff' : '1px solid rgba(0,0,0,0.12)',
                                 }}
                               >
                                 {isLoadingType ? (
@@ -661,7 +674,7 @@ export default function Home() {
 
                         if (loadingType) {
                           return (
-                            <div className="mt-4 p-4 rounded-lg flex items-center gap-3 text-sm text-white/50" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                            <div className="mt-4 p-4 rounded-lg flex items-center gap-3 text-sm" style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.08)', color: 'rgba(26,26,26,0.5)' }}>
                               <Loader2 className="w-4 h-4 animate-spin" />
                               <span>{def?.label} schrijven...</span>
                             </div>
@@ -678,16 +691,16 @@ export default function Home() {
 
                         if (text) {
                           return (
-                            <div className="mt-4 p-4 rounded-lg" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                            <div className="mt-4 p-4 rounded-lg" style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.08)' }}>
                               <div className="flex items-center justify-between mb-3">
-                                <h4 className="text-sm font-semibold text-white/80 flex items-center gap-2">
+                                <h4 className="text-sm font-semibold flex items-center gap-2" style={{ color: '#1a1a1a' }}>
                                   {ActiveIcon && <ActiveIcon className="w-4 h-4" />}
                                   {def?.label}
                                 </h4>
                                 <button
                                   onClick={() => copyContent(text, key)}
                                   className="flex items-center gap-2 text-xs font-medium"
-                                  style={{ color: '#ddb3ff' }}
+                                  style={{ color: '#7b61ff' }}
                                 >
                                   {contentCopied === key ? (
                                     <>
@@ -702,7 +715,7 @@ export default function Home() {
                                   )}
                                 </button>
                               </div>
-                              <pre className="whitespace-pre-wrap font-sans text-sm text-white/70 leading-relaxed">
+                              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed" style={{ color: 'rgba(26,26,26,0.75)' }}>
                                 {text}
                               </pre>
                             </div>
@@ -731,7 +744,8 @@ export default function Home() {
                   setActiveContentType({});
                   setContentCopied(null);
                 }}
-                className="text-white/40 hover:text-white text-sm font-medium"
+                className="text-xs hover:underline"
+                style={{ color: '#ddb3ff' }}
               >
                 Nieuwe zoekopdracht starten
               </button>
