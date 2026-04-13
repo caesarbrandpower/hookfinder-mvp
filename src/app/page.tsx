@@ -321,7 +321,7 @@ export default function Home() {
         <img
           src="https://newfound.agency/wp-content/uploads/2025/06/Logo_newfound.svg"
           alt="Newfound"
-          className="h-8"
+          style={{ height: '14px' }}
         />
       </nav>
 
@@ -334,20 +334,19 @@ export default function Home() {
           HOOKFINDER
         </h1>
         <p
-          className="text-xl md:text-2xl mb-2"
-          style={{ fontFamily: 'KansasNew, serif', fontWeight: 500, color: '#fff' }}
+          className="max-w-2xl mx-auto"
+          style={{ fontFamily: 'KansasNew, serif', fontWeight: 500, color: '#fff', fontSize: '18px', lineHeight: '1.4', marginBottom: '8px' }}
         >
           Wat maakt jouw merk vandaag nieuwswaardig?
         </p>
         <p
-          className="text-sm md:text-base mb-1 max-w-2xl mx-auto"
-          style={{ fontFamily: 'Satoshi, sans-serif', color: 'rgba(255,255,255,0.6)' }}
+          className="max-w-2xl mx-auto"
+          style={{ fontFamily: 'Satoshi, sans-serif', color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.5', marginBottom: '6px' }}
         >
           Vind de haak en schrijf er direct een persbericht, LinkedIn-post, pitchmail of nieuwsbriefintro mee.
         </p>
         <p
-          className="text-xs md:text-sm"
-          style={{ fontFamily: 'Satoshi, sans-serif', color: 'rgba(255,255,255,0.4)' }}
+          style={{ fontFamily: 'Satoshi, sans-serif', color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: '1.4' }}
         >
           Voor PR-bureaus en communicatieteams
         </p>
@@ -569,7 +568,7 @@ export default function Home() {
                   <div className="flex items-start gap-4">
                     <div
                       className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm"
-                      style={{ background: 'rgba(123,97,255,0.12)', color: '#7b61ff' }}
+                      style={{ background: 'rgba(221,179,255,0.15)', color: '#ddb3ff' }}
                     >
                       {index + 1}
                     </div>
@@ -577,7 +576,7 @@ export default function Home() {
                       <h3 className="text-lg font-semibold mb-3 leading-relaxed" style={{ color: '#1a1a1a' }}>
                         {hook.hook}
                       </h3>
-                      <p className="text-sm leading-relaxed mb-4" style={{ color: 'rgba(26,26,26,0.6)' }}>
+                      <p className="text-sm leading-relaxed mb-4" style={{ color: '#333333' }}>
                         {hook.explanation}
                       </p>
 
@@ -594,7 +593,7 @@ export default function Home() {
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline-flex items-start gap-1.5 text-sm hover:underline"
-                                  style={{ color: '#7b61ff' }}
+                                  style={{ color: '#ddb3ff' }}
                                 >
                                   <ExternalLink className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                                   <span className="break-words">{source.title}</span>
@@ -645,9 +644,9 @@ export default function Home() {
                                 disabled={isLoadingType}
                                 className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                                 style={{
-                                  background: isActive ? '#7b61ff' : '#fff',
-                                  color: isActive ? '#fff' : '#1a1a1a',
-                                  border: isActive ? '1px solid #7b61ff' : '1px solid rgba(0,0,0,0.12)',
+                                  background: isActive ? '#ddb3ff' : 'transparent',
+                                  color: isActive ? '#1a1a1a' : '#ddb3ff',
+                                  border: '1px solid #ddb3ff',
                                 }}
                               >
                                 {isLoadingType ? (
@@ -700,7 +699,7 @@ export default function Home() {
                                 <button
                                   onClick={() => copyContent(text, key)}
                                   className="flex items-center gap-2 text-xs font-medium"
-                                  style={{ color: '#7b61ff' }}
+                                  style={{ color: '#ddb3ff' }}
                                 >
                                   {contentCopied === key ? (
                                     <>
