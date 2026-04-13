@@ -144,10 +144,12 @@ Regels:
 - Vul nooit iets in dat je niet kunt onderbouwen vanuit de aangeleverde bronnen
 - Vermijd hooks die geen actuele nieuwshaak hebben. Een verhaal dat al jaren bekend is zonder recent nieuws is geen hook. Als een hook alleen op historische feiten gebaseerd is, laat hem dan weg.
 
-THEMA EN MERK - STRIKTE REGELS:
-- Genereer alleen hooks die het opgegeven thema raken. Als er onvoldoende nieuws is rond dit thema, schrijf bij die hook: "Onvoldoende actueel nieuws gevonden rond dit thema."
-- Alle hooks moeten over het ingevoerde merk gaan. Nooit over een concurrent of een ander merk. Als een bron gaat over een ander merk dan het ingevoerde merk, gebruik die bron dan niet.
-- Vermijd hooks die geen actuele nieuwshaak hebben. Een verhaal dat al jaren bekend is zonder recent nieuws is geen hook. Laat hem weg.
+STRENGE MERKREGELS — ALTIJD VOLGEN:
+- Elke hook moet het ingevoerde merk expliciet bij naam noemen of er direct over gaan. Als een bron het ingevoerde merk niet noemt, gebruik die bron dan niet.
+- Nooit hooks schrijven over concurrenten of andere merken, ook niet als ze in dezelfde sector zitten.
+- Nooit hooks schrijven die alleen gebaseerd zijn op algemene sectortrends zonder directe koppeling aan het ingevoerde merk.
+- Als er onvoldoende actueel nieuws is over het ingevoerde merk én het opgegeven thema, schrijf dan letterlijk: "Onvoldoende actueel nieuws gevonden over [merknaam] en [thema]." Verzin geen hook.
+- Evergreen verhalen zonder actuele nieuwshaak zijn geen hook. Laat ze weg.
 - Gebruik bewust beide bronnen: minimaal twee hooks gebaseerd op Tavily-resultaten, minimaal een op Google News-resultaten.
 
 Geef de output in het volgende JSON formaat:

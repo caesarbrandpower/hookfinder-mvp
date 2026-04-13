@@ -66,9 +66,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Haal Tavily en Google News parallel op
-    const googleQuery = sector ? `${query} ${sector}` : query;
-    const tavilyPromise = fetchTavily(query, sector, lang, period, mediaType);
+    // Haal Tavily en Google News parallel op — combineer merknaam + thema
+    const combinedQuery = sector ? `${query} ${sector}` : query;
+    const tavilyPromise = fetchTavily(combinedQuery, sector, lang, period, mediaType);
     const googleNewsPromise = fetchGoogleNews(googleQuery);
 
     const [tavilyData, googleNews] = await Promise.all([tavilyPromise, googleNewsPromise]);
@@ -99,7 +99,7 @@ async function fetchTavily(
     return { results: [], answer: '' };
   }
 
-  const base = sector ? `${query} ${sector} nieuws trends` : `${query} nieuws trends`;
+  const base = `${query} nieuws trends`;
   const mediaSuffix = MEDIA_TYPE_QUERY[mediaType] ?? '';
   const searchQuery = `${base}${mediaSuffix}`;
   const days = PERIOD_DAYS[period] ?? 7;
