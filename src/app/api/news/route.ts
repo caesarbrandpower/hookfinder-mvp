@@ -67,12 +67,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Twee parallelle zoekopdrachten: merkspecifiek + sectorcontext
-    const sectorQuery = sector ? `${sector} actueel trends` : `${query} actueel trends`;
-    const googleQuery = sector ? `${sector} actueel` : query;
+    const sectorQuery = sector || query;
+    const googleQuery = sector ? `${query} ${sector}` : query;
 
     const [brandNews, sectorNews, googleNews] = await Promise.all([
-      fetchTavily(query, undefined, lang, period, mediaType),
-      sector ? fetchTavily(sectorQuery, undefined, lang, period, mediaType) : Promise.resolve({ results: [], answer: '' }),
+      fetchTavily(query, lang, period, mediaType),
+      sector ? fetchTavily(sectorQuery, lang, period, mediaType) : Promise.resolve({ results: [], answer: '' }),
       fetchGoogleNews(googleQuery),
     ]);
 
@@ -92,7 +92,6 @@ export async function POST(request: NextRequest) {
 
 async function fetchTavily(
   query: string,
-  sector: string | undefined,
   lang: LangFilter,
   period: PeriodFilter,
   mediaType: MediaTypeFilter,
