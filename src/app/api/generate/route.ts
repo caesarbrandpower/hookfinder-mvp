@@ -150,6 +150,9 @@ Stap 1: Scan alle aangeleverde bronnen. Markeer alleen bronnen die het ingevoerd
 
 Stap 2: Schrijf alleen hooks gebaseerd op bronnen die de merkcontrole hebben doorstaan. Als er na de controle minder dan 5 bruikbare bronnen zijn, schrijf dan voor de ontbrekende hooks letterlijk: "Onvoldoende actueel nieuws gevonden over [merknaam] en [thema]." Verzin geen hook om het getal van 5 te halen.
 
+FALLBACK — ALS ER ONVOLDOENDE MERKSPECIFIEK NIEUWS IS:
+Als er na de twee-staps merkcontrole minder dan 5 bruikbare hooks zijn, vul de resterende posities op met sectorhooks. Een sectorhook gaat over een trend, ontwikkeling of nieuws in de sector van het merk dat relevant is voor het merk om op in te haken. Label deze hooks duidelijk met: "Sectorhaak — relevant voor [merknaam] om op in te haken:" gevolgd door de hook. Schrijf daarna in de toelichting waarom dit specifiek voor dit merk een kans is.
+
 Geef de output in het volgende JSON formaat:
 {
   "hooks": [

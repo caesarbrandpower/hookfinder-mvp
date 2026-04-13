@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     // Haal Tavily en Google News parallel op — combineer merknaam + thema
     const combinedQuery = sector ? `${query} ${sector}` : query;
     const tavilyPromise = fetchTavily(combinedQuery, sector, lang, period, mediaType);
-    const googleNewsPromise = fetchGoogleNews(googleQuery);
+    const googleNewsPromise = fetchGoogleNews(combinedQuery);
 
     const [tavilyData, googleNews] = await Promise.all([tavilyPromise, googleNewsPromise]);
 
