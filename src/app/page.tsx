@@ -164,8 +164,11 @@ export default function Home() {
       });
 
       let newsData: NewsData = { results: [], answer: '' };
+      let googleNews: Array<{ title: string; url: string; pubDate: string }> = [];
       if (newsResponse.ok) {
-        newsData = await newsResponse.json();
+        const newsJson = await newsResponse.json();
+        newsData = { results: newsJson.results || [], answer: newsJson.answer || '' };
+        googleNews = newsJson.googleNews || [];
       }
 
       // Stap 3: Genereer hooks
@@ -176,6 +179,7 @@ export default function Home() {
         body: JSON.stringify({
           websiteContent,
           newsData,
+          googleNews,
           companyName,
           sector: sector || undefined,
         }),
@@ -335,13 +339,13 @@ export default function Home() {
         </h1>
         <p
           className="max-w-2xl mx-auto"
-          style={{ fontFamily: 'KansasNew, serif', fontWeight: 500, color: '#fff', fontSize: '18px', lineHeight: '1.4', marginBottom: '8px' }}
+          style={{ fontFamily: 'KansasNew, serif', fontWeight: 500, color: '#fff', fontSize: '20px', lineHeight: '1.4', marginBottom: '8px' }}
         >
           Wat maakt jouw merk vandaag nieuwswaardig?
         </p>
         <p
           className="max-w-2xl mx-auto"
-          style={{ fontFamily: 'Satoshi, sans-serif', color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.5', marginBottom: '6px' }}
+          style={{ fontFamily: 'Satoshi, sans-serif', color: 'rgba(255,255,255,0.6)', fontSize: '15px', lineHeight: '1.5', marginBottom: '6px' }}
         >
           Vind de haak en schrijf er direct een persbericht, LinkedIn-post, pitchmail of nieuwsbriefintro mee.
         </p>
@@ -563,12 +567,12 @@ export default function Home() {
                 <div
                   key={index}
                   className="rounded-xl p-6 transition-all"
-                  style={{ background: '#f5f5f5', border: '1px solid rgba(0,0,0,0.06)' }}
+                  style={{ background: '#f8f8f8', border: '1px solid rgba(0,0,0,0.06)' }}
                 >
                   <div className="flex items-start gap-4">
                     <div
                       className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm"
-                      style={{ background: 'rgba(221,179,255,0.15)', color: '#ddb3ff' }}
+                      style={{ background: 'rgba(221,179,255,0.25)', color: '#c48bff' }}
                     >
                       {index + 1}
                     </div>
@@ -582,7 +586,7 @@ export default function Home() {
 
                       {hook.sources && hook.sources.length > 0 && (
                         <div className="mb-4">
-                          <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'rgba(26,26,26,0.4)' }}>
+                          <p className="font-semibold uppercase tracking-wide mb-2" style={{ color: '#999999', fontSize: '11px' }}>
                             Bronnen
                           </p>
                           <ul className="space-y-1">
@@ -592,8 +596,8 @@ export default function Home() {
                                   href={source.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-start gap-1.5 text-sm hover:underline"
-                                  style={{ color: '#ddb3ff' }}
+                                  className="inline-flex items-start gap-1.5 hover:underline"
+                                  style={{ color: '#555555', fontSize: '13px' }}
                                 >
                                   <ExternalLink className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                                   <span className="break-words">{source.title}</span>
@@ -642,11 +646,11 @@ export default function Home() {
                                 key={ct.id}
                                 onClick={() => handleContentTypeClick(hook, index, ct.id)}
                                 disabled={isLoadingType}
-                                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                                className="btn-content-type flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                                 style={{
-                                  background: isActive ? '#ddb3ff' : 'transparent',
-                                  color: isActive ? '#1a1a1a' : '#ddb3ff',
-                                  border: '1px solid #ddb3ff',
+                                  background: isActive ? '#333333' : '#2a2a2a',
+                                  color: '#fff',
+                                  border: 'none',
                                 }}
                               >
                                 {isLoadingType ? (

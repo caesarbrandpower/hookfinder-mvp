@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Parser from 'rss-parser';
 
 const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
+const rssParser = new Parser();
 
 type LangFilter = 'international' | 'nl' | 'en';
 type PeriodFilter = 'week' | 'day' | 'month';
@@ -17,6 +19,29 @@ const MEDIA_TYPE_QUERY: Record<MediaTypeFilter, string> = {
   vakbladen: ' (vakblad OR brancheblad)',
   dagbladen: ' (nieuws OR krant)',
 };
+
+interface GoogleNewsItem {
+  title: string;
+  url: string;
+  pubDate: string;
+}
+
+async function fetchGoogleNews(query: string): Promise<GoogleNewsItem[]> {
+  try {
+    const encoded = encodeURIComponent(query);
+    const url = `https://news.google.com/rss/search?q=${encoded}&hl=nl&gl=NL&ceid=NL:nl`;
+    const feed = await rssParser.parseURL(url);
+
+    return (feed.items || []).slice(0, 5).map((item) => ({
+      title: item.title || '',
+      url: item.link || '',
+      pubDate: item.pubDate || '',
+    }));
+  } catch (error) {
+    console.error('Google News RSS error:', error);
+    return [];
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,56 +66,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!TAVILY_API_KEY || TAVILY_API_KEY === 'your_tavily_api_key_here') {
-      return NextResponse.json(
-        { error: 'Tavily API key niet geconfigureerd' },
-        { status: 500 }
-      );
-    }
+    // Haal Tavily en Google News parallel op
+    const tavilyPromise = fetchTavily(query, sector, lang, period, mediaType);
+    const googleNewsPromise = fetchGoogleNews(query);
 
-    // Bouw de zoekquery
-    const base = sector ? `${query} ${sector} nieuws trends` : `${query} nieuws trends`;
-    const mediaSuffix = MEDIA_TYPE_QUERY[mediaType] ?? '';
-    const searchQuery = `${base}${mediaSuffix}`;
-
-    const days = PERIOD_DAYS[period] ?? 7;
-
-    const tavilyBody: Record<string, unknown> = {
-      query: searchQuery,
-      search_depth: 'advanced',
-      include_answer: true,
-      max_results: 10,
-      topic: 'news',
-      days,
-    };
-
-    if (lang === 'nl' || lang === 'en') {
-      tavilyBody.search_lang = lang;
-    }
-
-    const response = await fetch('https://api.tavily.com/search', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${TAVILY_API_KEY}`,
-      },
-      body: JSON.stringify(tavilyBody),
-    });
-
-    if (!response.ok) {
-      const errText = await response.text().catch(() => '');
-      console.error('Tavily API error:', response.status, errText.slice(0, 300));
-      return NextResponse.json(
-        { error: 'Kon geen nieuws ophalen', results: [], answer: '' },
-        { status: 200 }
-      );
-    }
-
-    const data = await response.json();
+    const [tavilyData, googleNews] = await Promise.all([tavilyPromise, googleNewsPromise]);
 
     return NextResponse.json({
-      results: data.results || [],
-      answer: data.answer || '',
+      results: tavilyData.results,
+      answer: tavilyData.answer,
+      googleNews,
     });
   } catch (error) {
     console.error('News fetch error:', error);
@@ -99,4 +84,56 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+async function fetchTavily(
+  query: string,
+  sector: string | undefined,
+  lang: LangFilter,
+  period: PeriodFilter,
+  mediaType: MediaTypeFilter,
+): Promise<{ results: Array<{ title: string; content: string; url: string }>; answer: string }> {
+  if (!TAVILY_API_KEY || TAVILY_API_KEY === 'your_tavily_api_key_here') {
+    console.warn('Tavily API key niet geconfigureerd, overslaan');
+    return { results: [], answer: '' };
+  }
+
+  const base = sector ? `${query} ${sector} nieuws trends` : `${query} nieuws trends`;
+  const mediaSuffix = MEDIA_TYPE_QUERY[mediaType] ?? '';
+  const searchQuery = `${base}${mediaSuffix}`;
+  const days = PERIOD_DAYS[period] ?? 7;
+
+  const tavilyBody: Record<string, unknown> = {
+    query: searchQuery,
+    search_depth: 'advanced',
+    include_answer: true,
+    max_results: 10,
+    topic: 'news',
+    days,
+  };
+
+  if (lang === 'nl' || lang === 'en') {
+    tavilyBody.search_lang = lang;
+  }
+
+  const response = await fetch('https://api.tavily.com/search', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${TAVILY_API_KEY}`,
+    },
+    body: JSON.stringify(tavilyBody),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text().catch(() => '');
+    console.error('Tavily API error:', response.status, errText.slice(0, 300));
+    return { results: [], answer: '' };
+  }
+
+  const data = await response.json();
+  return {
+    results: data.results || [],
+    answer: data.answer || '',
+  };
 }

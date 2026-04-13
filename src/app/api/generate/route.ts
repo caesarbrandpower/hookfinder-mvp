@@ -9,7 +9,7 @@ const anthropic = ANTHROPIC_API_KEY && ANTHROPIC_API_KEY !== 'your_anthropic_api
 
 export async function POST(request: NextRequest) {
   try {
-    const { websiteContent, newsData, companyName, sector } = await request.json();
+    const { websiteContent, newsData, googleNews, companyName, sector } = await request.json();
 
     if (!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY === 'your_anthropic_api_key_here') {
       return NextResponse.json(
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Bouw de prompt
-    const prompt = buildPrompt(websiteContent, newsData, companyName, sector);
+    const prompt = buildPrompt(websiteContent, newsData, googleNews, companyName, sector);
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
@@ -78,13 +78,22 @@ export async function POST(request: NextRequest) {
 function buildPrompt(
   websiteContent: string,
   newsData: { results: Array<{ title: string; content: string; url: string }>; answer: string },
+  googleNews: Array<{ title: string; url: string; pubDate: string }> | undefined,
   companyName: string,
   sector?: string
 ): string {
   const hasWebsiteContent = websiteContent && websiteContent.length > 0;
   const hasNewsData = newsData && newsData.results && newsData.results.length > 0;
+  const hasGoogleNews = googleNews && googleNews.length > 0;
 
-  let prompt = `Je bent een PR-strateeg. Je krijgt twee soorten input: (1) tekst van de website van een merk, en (2) actueel nieuws en trending topics rond dat merk of die sector.
+  let prompt = `Je werkt als een ervaren PR-strateeg volgens bewezen methodieken:
+
+1. NEWSJACKING (David Meerman Scott): Zoek het exacte moment waarop dit merk kan inhaken op een lopend nieuwsverhaal. Timing is alles - de haak moet nu relevant zijn.
+2. SO WHAT TEST (Michael Smart): Elke hook moet direct beantwoorden waarom dit nu relevant is voor een journalist. Als je "en dan?" denkt, is hij niet sterk genoeg.
+3. LEZER CENTRAAL (Ann Handley): Schrijf altijd vanuit het perspectief van de journalist of lezer, nooit vanuit het merk.
+4. INVERTED PYRAMID: Bij persberichten altijd het belangrijkste eerst. De nieuwshaak in de eerste zin, niet de bedrijfsintroductie.
+
+Je krijgt twee soorten input: (1) tekst van de website van een merk, en (2) actueel nieuws en trending topics rond dat merk of die sector.
 
 Genereer op basis van deze combinatie 5 PR-hooks voor een PR-bureau dat dit merk als klant heeft.
 
@@ -131,9 +140,9 @@ Gebruik voor "sources" alleen artikelen die letterlijk in de lijst hieronder sta
     prompt += `=== WEBSITE CONTENT ===\n[Geen website content beschikbaar]\n\n`;
   }
 
-  // Nieuws data
+  // Nieuws data (Tavily)
   if (hasNewsData) {
-    prompt += `=== ACTUEEL NIEUWS ===\n`;
+    prompt += `=== ACTUEEL NIEUWS (Tavily) ===\n`;
     if (newsData.answer) {
       prompt += `Samenvatting: ${newsData.answer}\n\n`;
     }
@@ -144,10 +153,23 @@ Gebruik voor "sources" alleen artikelen die letterlijk in de lijst hieronder sta
       prompt += `Content: ${article.content?.substring(0, 500) || 'Geen content'}\n\n`;
     });
   } else {
-    prompt += `=== ACTUEEL NIEUWS ===\n[Geen nieuwsdata beschikbaar]\n\n`;
+    prompt += `=== ACTUEEL NIEUWS (Tavily) ===\n[Geen nieuwsdata beschikbaar]\n\n`;
   }
 
-  prompt += `Genereer nu 5 PR-hooks in het gevraagde JSON formaat.`;
+  // Google News RSS
+  if (hasGoogleNews) {
+    prompt += `=== GOOGLE NEWS ===\n`;
+    googleNews.slice(0, 5).forEach((item, index) => {
+      prompt += `Artikel ${index + 1}:\n`;
+      prompt += `Titel: ${item.title}\n`;
+      prompt += `URL: ${item.url}\n`;
+      prompt += `Datum: ${item.pubDate}\n\n`;
+    });
+  } else {
+    prompt += `=== GOOGLE NEWS ===\n[Geen Google News resultaten beschikbaar]\n\n`;
+  }
+
+  prompt += `Genereer nu 5 PR-hooks in het gevraagde JSON formaat. Gebruik beide nieuwsbronnen (Tavily en Google News) als context.`;
 
   return prompt;
 }

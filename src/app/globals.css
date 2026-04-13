@@ -51,3 +51,7 @@ select option {
   background: #2a2a2a;
   color: #fff;
 }
+
+.btn-content-type:hover {
+  background: #3a3a3a !important;
+}
