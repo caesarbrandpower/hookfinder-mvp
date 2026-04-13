@@ -109,6 +109,12 @@ Regels:
 - Varieer tussen: merkpositionering, maatschappelijke relevantie, sector-trends, business-angle, human interest
 - Schrijf in het Nederlands, tenzij de input volledig in het Engels is
 - Vul nooit iets in dat je niet kunt onderbouwen vanuit de aangeleverde bronnen
+- Vermijd hooks die geen actuele nieuwshaak hebben. Een verhaal dat al jaren bekend is zonder recent nieuws is geen hook. Als een hook alleen op historische feiten gebaseerd is, laat hem dan weg.
+
+BELANGRIJK:
+- Genereer alleen hooks die het opgegeven thema raken. Als er onvoldoende nieuws is rond dit thema, benoem dat eerlijk bij die hook.
+- Alle hooks moeten over het ingevoerde merk gaan, nooit over een concurrent.
+- Gebruik minimaal twee hooks uit de Tavily-resultaten en minimaal een uit de Google News-resultaten. Label de bron niet in de output maar gebruik beide bewust.
 
 Geef de output in het volgende JSON formaat:
 {

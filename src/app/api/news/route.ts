@@ -67,8 +67,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Haal Tavily en Google News parallel op
+    const googleQuery = sector ? `${query} ${sector}` : query;
     const tavilyPromise = fetchTavily(query, sector, lang, period, mediaType);
-    const googleNewsPromise = fetchGoogleNews(query);
+    const googleNewsPromise = fetchGoogleNews(googleQuery);
 
     const [tavilyData, googleNews] = await Promise.all([tavilyPromise, googleNewsPromise]);
 
