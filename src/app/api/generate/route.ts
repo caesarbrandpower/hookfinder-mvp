@@ -138,16 +138,15 @@ Gebruik deze filters om te beoordelen welk nieuws een sterke hook oplevert:
 - Lezer centraal (Ann Handley): gaat de hook over de lezer, niet over het merk?
 
 STAP 3 — SCHRIJF DE HOOKS:
-Schrijf 5 hooks. Gebruik hierbij deze prioriteitvolgorde:
-1. Eerst: hooks gebaseerd op MERKNIEUWS waar het merk al in voorkomt
-2. Daarna: sectorhooks waarbij het merk expliciet kan inhaken op actuele context
-
 Voor elke hook:
 - HOOK: een scherpe zin van maximaal 12 woorden. Triggert. Zet aan tot lezen.
 - TOELICHTING: twee zinnen. Waarom nu relevant? Voor welk medium?
-- Bij sectorhooks: voeg toe "Sectorhaak: [merknaam] kan hierop inhaken omdat..."
 
-Als er onvoldoende materiaal is voor 5 hooks: schrijf alleen de hooks die echt sterk zijn. Liever 3 sterke hooks dan 5 zwakke.
+OUTPUT REGEL: Schrijf altijd precies 5 hooks. Gebruik deze prioriteit:
+1. Merkspecifieke hooks gebaseerd op MERKNIEUWS — zoveel mogelijk
+2. Aanvullen met sectorhooks uit SECTORCONTEXT tot je op 5 komt
+3. Sectorhooks beginnen altijd met "Sectorhaak:" in de toelichting
+Schrijf nooit minder dan 5 hooks.
 
 Schrijf in het Nederlands, tenzij de input volledig in het Engels is.
 Varieer tussen: merkpositionering, maatschappelijke relevantie, sector-trends, business-angle, human interest.
