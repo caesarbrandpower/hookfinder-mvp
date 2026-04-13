@@ -25,12 +25,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Normaliseer input
+    const safeNewsData = newsData && newsData.results ? newsData : { results: [], answer: '' };
+    const safeGoogleNews = Array.isArray(googleNews) ? googleNews : [];
+
     // Bouw de prompt
-    const prompt = buildPrompt(websiteContent, newsData, googleNews, companyName, sector);
+    const prompt = buildPrompt(websiteContent || '', safeNewsData, safeGoogleNews, companyName, sector);
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
       max_tokens: 2000,
+      system: 'Je bent een PR-strateeg. Antwoord UITSLUITEND met valide JSON. Geen tekst, uitleg of markdown code-fences rondom de JSON. Begin direct met { en eindig met }.',
       messages: [
         {
           role: 'user',
@@ -47,25 +52,53 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse de JSON respons. Claude geeft soms de JSON terug in een code-fence of
-    // met wat tekst eromheen, dus halen we eerst het JSON-object eruit.
+    // Parse de JSON respons
     const rawText = content.text;
-    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-    const jsonString = jsonMatch ? jsonMatch[0] : rawText;
 
-    try {
-      const parsed = JSON.parse(jsonString);
-      const hooks = Array.isArray(parsed) ? parsed : parsed.hooks;
-      if (!Array.isArray(hooks)) {
-        throw new Error('Geen hooks array gevonden');
-      }
-      return NextResponse.json({ hooks });
-    } catch (parseError) {
-      console.error('JSON parse error:', parseError, '\nRaw:', rawText.slice(0, 500));
-      return NextResponse.json({
-        hooks: parseTextResponse(rawText),
-      });
+    // Strip markdown code fences als die er zijn
+    let cleaned = rawText.trim();
+    const fenceMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (fenceMatch) {
+      cleaned = fenceMatch[1].trim();
     }
+
+    // Probeer eerst de hele cleaned text als JSON
+    let hooks: Array<{ hook: string; explanation: string; sources?: Array<{ title: string; url: string }> }> | null = null;
+
+    for (const candidate of [cleaned, rawText]) {
+      try {
+        const parsed = JSON.parse(candidate.trim());
+        const arr = Array.isArray(parsed) ? parsed : parsed.hooks;
+        if (Array.isArray(arr) && arr.length > 0) {
+          hooks = arr;
+          break;
+        }
+      } catch {
+        // probeer JSON-object te extraheren
+        const jsonMatch = candidate.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            const parsed = JSON.parse(jsonMatch[0]);
+            const arr = Array.isArray(parsed) ? parsed : parsed.hooks;
+            if (Array.isArray(arr) && arr.length > 0) {
+              hooks = arr;
+              break;
+            }
+          } catch {
+            // volgende candidate
+          }
+        }
+      }
+    }
+
+    if (hooks) {
+      return NextResponse.json({ hooks });
+    }
+
+    console.error('JSON parse failed for all strategies.\nRaw:', rawText.slice(0, 800));
+    return NextResponse.json({
+      hooks: parseTextResponse(rawText),
+    });
   } catch (error) {
     console.error('Generate error:', error);
     return NextResponse.json(
