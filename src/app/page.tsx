@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Search, Copy, Check, Newspaper, Globe, Loader2, FileText, Megaphone, Mail, Link2, ExternalLink } from 'lucide-react';
 
 interface Source {
@@ -357,7 +358,14 @@ export default function Home() {
         <p
           style={{ fontFamily: 'Satoshi, sans-serif', color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: '1.4' }}
         >
-          Voor PR-bureaus en communicatieteams
+          Voor PR-bureaus en communicatieteams &nbsp;·&nbsp;{' '}
+          <Link
+            href="/hoe-werkt-het"
+            className="hover:text-white transition-colors"
+            style={{ color: '#ddb3ff', textDecoration: 'none' }}
+          >
+            Hoe werkt het?
+          </Link>
         </p>
       </header>
 
