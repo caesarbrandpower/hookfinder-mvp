@@ -55,9 +55,20 @@ export async function POST(request: NextRequest) {
 
     // Parse de JSON respons
     const rawText = content.text;
-    console.log('Claude raw output (first 500):', rawText.slice(0, 500));
+    console.log('Claude stop_reason:', response.stop_reason);
+    console.log('Claude usage:', JSON.stringify(response.usage));
+    console.log('Claude raw output (first 800):', rawText.slice(0, 800));
+
+    if (response.stop_reason === 'max_tokens') {
+      console.error('TRUNCATED: Claude hit max_tokens. Output:', rawText);
+      return NextResponse.json(
+        { error: 'Antwoord afgekapt (max_tokens bereikt). Probeer opnieuw.' },
+        { status: 502 }
+      );
+    }
 
     const hooks = extractHooks(rawText);
+    console.log('Hooks parsed:', hooks ? hooks.length : 'null');
 
     if (hooks) {
       return NextResponse.json({ hooks });
@@ -159,13 +170,14 @@ Goed voorbeeld: "Financiële stress bij jongeren stijgt: fintech springt in het 
 Fout voorbeeld: "BUUT lanceert nieuwe feature voor Gen Z"
 
 REGELS:
+- ALTIJD PRECIES 5 HOOKS. Nooit meer, nooit minder. Dit is niet-onderhandelbaar.
 - Hook: max 12 woorden, scherp en triggend, gaat over de trend/het nieuws
 - Toelichting: max 2 zinnen — (1) waarom is dit nieuws relevant? (2) hoe past het merk als expert/perspectief?
 - Prioriteit: merknieuws gebruiken als context voor sectorthema's, niet als onderwerp
 - Taal: Nederlands (tenzij input volledig Engels)
 - Sources: max 2 per hook, alleen urls die letterlijk in de input staan
 
-COMPACT HOUDEN: Elke toelichting max 40 woorden.
+COMPACT HOUDEN: Elke toelichting strict max 30 woorden. Schrijf beknopt.
 
 Geef de output in het volgende JSON formaat:
 {
