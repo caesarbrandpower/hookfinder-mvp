@@ -55,53 +55,19 @@ export async function POST(request: NextRequest) {
 
     // Parse de JSON respons
     const rawText = content.text;
+    console.log('Claude raw output (first 500):', rawText.slice(0, 500));
 
-    // Strip markdown code fences als die er zijn
-    let cleaned = rawText.trim();
-    const fenceMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (fenceMatch) {
-      cleaned = fenceMatch[1].trim();
-    }
-
-    // Probeer eerst de hele cleaned text als JSON
-    let hooks: Array<{ hook: string; explanation: string; sources?: Array<{ title: string; url: string }> }> | null = null;
-
-    for (const candidate of [cleaned, rawText]) {
-      try {
-        const parsed = JSON.parse(candidate.trim());
-        const arr = Array.isArray(parsed) ? parsed : parsed.hooks;
-        if (Array.isArray(arr) && arr.length > 0) {
-          hooks = arr;
-          break;
-        }
-      } catch {
-        // probeer JSON-object te extraheren
-        const jsonMatch = candidate.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          try {
-            const parsed = JSON.parse(jsonMatch[0]);
-            const arr = Array.isArray(parsed) ? parsed : parsed.hooks;
-            if (Array.isArray(arr) && arr.length > 0) {
-              hooks = arr;
-              break;
-            }
-          } catch {
-            // volgende candidate
-          }
-        }
-      }
-    }
+    const hooks = extractHooks(rawText);
 
     if (hooks) {
       return NextResponse.json({ hooks });
     }
 
-    console.error('JSON parse failed for all strategies.\nRaw Claude output:', rawText.slice(0, 1500));
+    console.error('JSON parse failed.\nFull Claude output:', rawText);
     return NextResponse.json(
       {
-        error: 'Hooks niet gegenereerd: Claude gaf geen valide JSON terug. Probeer het opnieuw.',
+        error: `Claude gaf geen valide JSON terug. Raw output: "${rawText.slice(0, 200)}"`,
         stage: 'claude-parse',
-        rawPreview: rawText.slice(0, 300),
       },
       { status: 502 }
     );
@@ -113,6 +79,57 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+type Hook = { hook: string; explanation: string; sources?: Array<{ title: string; url: string }> };
+
+// Extraheert JSON via brace counting — betrouwbaarder dan regex op grote tekst
+function extractJsonObject(text: string): object | null {
+  const start = text.indexOf('{');
+  if (start === -1) return null;
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (escape) { escape = false; continue; }
+    if (ch === '\\' && inString) { escape = true; continue; }
+    if (ch === '"') { inString = !inString; continue; }
+    if (inString) continue;
+    if (ch === '{') depth++;
+    if (ch === '}') {
+      depth--;
+      if (depth === 0) {
+        try { return JSON.parse(text.slice(start, i + 1)); } catch { return null; }
+      }
+    }
+  }
+  return null;
+}
+
+function extractHooks(rawText: string): Hook[] | null {
+  // Strip markdown fences
+  let text = rawText.trim();
+  const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenceMatch) text = fenceMatch[1].trim();
+
+  // Probeer directe parse
+  for (const candidate of [text, rawText.trim()]) {
+    try {
+      const parsed = JSON.parse(candidate);
+      const arr = Array.isArray(parsed) ? parsed : (parsed as Record<string, unknown>).hooks;
+      if (Array.isArray(arr) && arr.length > 0) return arr as Hook[];
+    } catch { /* next */ }
+  }
+
+  // Brace-counting extractie
+  const obj = extractJsonObject(text) ?? extractJsonObject(rawText);
+  if (obj) {
+    const arr = (obj as Record<string, unknown>).hooks;
+    if (Array.isArray(arr) && arr.length > 0) return arr as Hook[];
+  }
+
+  return null;
 }
 
 function buildPrompt(
