@@ -43,6 +43,25 @@ async function fetchGoogleNews(query: string): Promise<GoogleNewsItem[]> {
   }
 }
 
+// Extraheert het domein uit een bedrijfsnaam of URL (bijv. "lezen.nl", "https://lezen.nl/foo")
+function extractDomain(query: string): string {
+  try {
+    const withProtocol = query.startsWith('http') ? query : `https://${query}`;
+    return new URL(withProtocol).hostname.replace(/^www\./, '').toLowerCase();
+  } catch {
+    return query.toLowerCase().replace(/^www\./, '');
+  }
+}
+
+// Filtert resultaten waarvan de URL afkomstig is van het eigen domein van het merk
+function filterOwnDomain(
+  results: Array<{ title: string; content: string; url: string }>,
+  domain: string
+): Array<{ title: string; content: string; url: string }> {
+  if (!domain) return results;
+  return results.filter((r) => !r.url.toLowerCase().includes(domain));
+}
+
 export async function POST(request: NextRequest) {
   try {
     const {
@@ -66,15 +85,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Twee parallelle zoekopdrachten: merkspecifiek + sectorcontext
-    const sectorQuery = sector || query;
-    const googleQuery = sector ? `${query} ${sector}` : query;
+    const companyDomain = extractDomain(query);
 
-    const [brandNews, sectorNews, googleNews] = await Promise.all([
+    // sectorQuery: gebruik sector als opgegeven, anders bredere branche-termen
+    const sectorQuery = sector || `${query} branche sector trends ontwikkelingen`;
+    const googleQuery = sector ? `${sector} nieuws Nederland` : `${query} sector nieuws`;
+
+    const [rawBrandNews, rawSectorNews, googleNews] = await Promise.all([
       fetchTavily(query, lang, period, mediaType),
-      sector ? fetchTavily(sectorQuery, lang, period, mediaType) : Promise.resolve({ results: [], answer: '' }),
+      fetchTavily(sectorQuery, lang, period, mediaType),
       fetchGoogleNews(googleQuery),
     ]);
+
+    // Verwijder eigen-domein resultaten zodat Claude externe bronnen citeert
+    const brandNews = {
+      ...rawBrandNews,
+      results: filterOwnDomain(rawBrandNews.results, companyDomain),
+    };
+    const sectorNews = {
+      ...rawSectorNews,
+      results: filterOwnDomain(rawSectorNews.results, companyDomain),
+    };
+
+    console.log(`News: brandNews ${brandNews.results.length} results, sectorNews ${sectorNews.results.length} results, googleNews ${googleNews.length} items`);
 
     return NextResponse.json({
       brandNews,
@@ -102,7 +135,7 @@ async function fetchTavily(
     return { results: [], answer: '' };
   }
 
-  const base = `${query} nieuws trends`;
+  const base = `${query} nieuws`;
   const mediaSuffix = MEDIA_TYPE_QUERY[mediaType] ?? '';
   const searchQuery = `${base}${mediaSuffix}`;
   const days = PERIOD_DAYS[period] ?? 7;
