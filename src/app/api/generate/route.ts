@@ -35,8 +35,8 @@ export async function POST(request: NextRequest) {
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 2000,
-      system: 'Je bent een PR-strateeg. Antwoord UITSLUITEND met valide JSON. Geen tekst, uitleg of markdown code-fences rondom de JSON. Begin direct met { en eindig met }.',
+      max_tokens: 4000,
+      system: 'Je bent een PR-strateeg. Antwoord UITSLUITEND met valide JSON. Geen tekst, uitleg of markdown code-fences rondom de JSON. Begin direct met { en eindig met }. Houd elke hook-tekst onder 15 woorden en elke toelichting onder 40 woorden.',
       messages: [
         {
           role: 'user',
@@ -145,38 +145,17 @@ function buildPrompt(
   const hasSectorNews = sectorNews && sectorNews.results && sectorNews.results.length > 0;
   const hasGoogleNews = googleNews && googleNews.length > 0;
 
-  let prompt = `Je bent een ervaren PR-strateeg. Je taak is om voor een PR-bureau actuele haakjes te vinden waarop een merk kan inhaken.
+  let prompt = `Je bent een PR-strateeg. Genereer precies 5 PR-hooks voor het gegeven merk.
 
-JE WERKT IN DRIE STAPPEN:
+REGELS:
+- Hook: max 12 woorden, scherp en triggend
+- Toelichting: max 2 korte zinnen (waarom nu relevant, voor welk medium)
+- Prioriteit: eerst merknieuws, dan sectorhooks aanvullen tot 5
+- Sectorhooks: begin toelichting met "Sectorhaak:"
+- Taal: Nederlands (tenzij input volledig Engels)
+- Sources: max 2 per hook, alleen urls die letterlijk in de input staan
 
-STAP 1 — SCAN DE BRONNEN:
-Je krijgt twee soorten input:
-- MERKNIEUWS: nieuws waar het merk zelf in voorkomt
-- SECTORCONTEXT: actuele trends en nieuws in de sector
-
-STAP 2 — SELECTEER DE STERKSTE HAAKJES:
-Gebruik deze filters om te beoordelen welk nieuws een sterke hook oplevert:
-- Newsjacking (David Meerman Scott): is er een actueel moment waarop het merk nu kan inhaken?
-- So What Test (Michael Smart): is direct duidelijk waarom dit relevant is voor een journalist?
-- Lezer centraal (Ann Handley): gaat de hook over de lezer, niet over het merk?
-
-STAP 3 — SCHRIJF DE HOOKS:
-Voor elke hook:
-- HOOK: een scherpe zin van maximaal 12 woorden. Triggert. Zet aan tot lezen.
-- TOELICHTING: twee zinnen. Waarom nu relevant? Voor welk medium?
-
-OUTPUT REGEL: Schrijf altijd precies 5 hooks. Gebruik deze prioriteit:
-1. Merkspecifieke hooks gebaseerd op MERKNIEUWS — zoveel mogelijk
-2. Aanvullen met sectorhooks uit SECTORCONTEXT tot je op 5 komt
-3. Sectorhooks beginnen altijd met "Sectorhaak:" in de toelichting
-Schrijf nooit minder dan 5 hooks.
-
-Schrijf in het Nederlands, tenzij de input volledig in het Engels is.
-Varieer tussen: merkpositionering, maatschappelijke relevantie, sector-trends, business-angle, human interest.
-
-Bronnen:
-- Voeg per hook een lijst van maximaal 3 nieuwsbronnen (titel + url) toe uit de meegeleverde artikelen die daadwerkelijk de basis vormen voor deze hook.
-- Gebruik voor "sources" alleen artikelen die letterlijk in de input hieronder staan. Verzin geen titels of urls. Kopieer de titel en url exact.
+COMPACT HOUDEN: Schrijf beknopt. Elke toelichting max 40 woorden.
 
 Geef de output in het volgende JSON formaat:
 {
