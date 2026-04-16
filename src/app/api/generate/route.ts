@@ -145,17 +145,27 @@ function buildPrompt(
   const hasSectorNews = sectorNews && sectorNews.results && sectorNews.results.length > 0;
   const hasGoogleNews = googleNews && googleNews.length > 0;
 
-  let prompt = `Je bent een PR-strateeg. Genereer precies 5 PR-hooks voor het gegeven merk.
+  let prompt = `Je bent een PR-strateeg die werkt voor een PR-bureau. Je taak: zoek nieuwstrends en sectorontwikkelingen waarop het merk een relevant verhaal heeft of waarop het kan reageren als expert.
+
+AANPAK — denk als een journalist:
+- Wat speelt er nu in de sector/maatschappij waar dit merk iets zinnigs over kan zeggen?
+- Welke trends, cijfers of ontwikkelingen zijn nieuwswaardig en sluiten aan bij waar het merk voor staat?
+- Het merk is het perspectief of de expert, NIET het nieuws zelf.
+
+VERBODEN: hooks die direct over het merk gaan ("Merk lanceert X", "Merk kondigt Y aan").
+DOEL: hooks over bredere ontwikkelingen waar het merk een verhaal bij heeft.
+
+Goed voorbeeld: "Financiële stress bij jongeren stijgt: fintech springt in het gat"
+Fout voorbeeld: "BUUT lanceert nieuwe feature voor Gen Z"
 
 REGELS:
-- Hook: max 12 woorden, scherp en triggend
-- Toelichting: max 2 korte zinnen (waarom nu relevant, voor welk medium)
-- Prioriteit: eerst merknieuws, dan sectorhooks aanvullen tot 5
-- Sectorhooks: begin toelichting met "Sectorhaak:"
+- Hook: max 12 woorden, scherp en triggend, gaat over de trend/het nieuws
+- Toelichting: max 2 zinnen — (1) waarom is dit nieuws relevant? (2) hoe past het merk als expert/perspectief?
+- Prioriteit: merknieuws gebruiken als context voor sectorthema's, niet als onderwerp
 - Taal: Nederlands (tenzij input volledig Engels)
 - Sources: max 2 per hook, alleen urls die letterlijk in de input staan
 
-COMPACT HOUDEN: Schrijf beknopt. Elke toelichting max 40 woorden.
+COMPACT HOUDEN: Elke toelichting max 40 woorden.
 
 Geef de output in het volgende JSON formaat:
 {
