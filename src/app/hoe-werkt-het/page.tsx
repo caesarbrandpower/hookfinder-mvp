@@ -219,7 +219,9 @@ export default function HoeWerktHet() {
             <RoadmapItem label="Perplexity integratie — diepere trends en context-analyse" />
             <RoadmapItem label="NewsAPI — directe toegang tot Nederlandse vakbladen" />
             <RoadmapItem label="Bronvalidatie — elke hook gekoppeld aan verificeerbare bron" />
-            <RoadmapItem label="Content-types — directe export naar persbericht, LinkedIn, pitch-mail" />
+            <RoadmapItem label="Content-types — standaard: persbericht, LinkedIn-post, pitch-mail journalist, nieuwsbrief-intro" />
+            <RoadmapItem label="Bureau-formats — upload jullie eigen templates, HookFinder past zich aan jullie huisstijl aan" />
+            <RoadmapItem label="Custom output — social posts, medialijsten, talking points, wat jullie nodig hebben" />
           </div>
         </Section>
 
@@ -230,6 +232,7 @@ export default function HoeWerktHet() {
             <RoadmapItem label="Sentiment analyse — social media monitoring van jouw klanten" />
             <RoadmapItem label="Concurrent tracking — wat communiceert de concurrentie" />
             <RoadmapItem label="Waybetter koppeling — van hook naar volledige campagne" />
+            <RoadmapItem label="White-label formats — volledige integratie met bureau-templates en workflows" />
           </div>
         </Section>
 
