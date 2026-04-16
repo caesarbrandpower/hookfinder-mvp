@@ -11,6 +11,8 @@ interface Source {
 interface Hook {
   hook: string;
   explanation: string;
+  hook_type?: string;
+  strategic_rationale?: string;
   sources?: Source[];
 }
 
@@ -580,12 +582,25 @@ export default function Home() {
                       {index + 1}
                     </div>
                     <div className="flex-1 min-w-0">
+                      {hook.hook_type && (
+                        <span
+                          className="inline-block mb-2 px-2 py-0.5 rounded text-xs font-medium uppercase tracking-wide"
+                          style={{ background: 'rgba(14,110,255,0.1)', color: '#0e6eff' }}
+                        >
+                          {hook.hook_type}
+                        </span>
+                      )}
                       <h3 className="text-lg font-semibold mb-3 leading-relaxed" style={{ color: '#1a1a1a' }}>
                         {hook.hook}
                       </h3>
-                      <p className="text-sm leading-relaxed mb-4" style={{ color: '#333333' }}>
+                      <p className="text-sm leading-relaxed mb-3" style={{ color: '#333333' }}>
                         {hook.explanation}
                       </p>
+                      {hook.strategic_rationale && (
+                        <p className="text-xs leading-relaxed mb-4 italic" style={{ color: '#888888' }}>
+                          Waarom sterk: {hook.strategic_rationale}
+                        </p>
+                      )}
 
                       {hook.sources && hook.sources.length > 0 && (
                         <div className="mb-4">

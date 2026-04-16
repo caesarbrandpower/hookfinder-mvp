@@ -92,7 +92,13 @@ export async function POST(request: NextRequest) {
   }
 }
 
-type Hook = { hook: string; explanation: string; sources?: Array<{ title: string; url: string }> };
+type Hook = {
+  hook: string;
+  explanation: string;
+  hook_type: string;
+  strategic_rationale: string;
+  sources?: Array<{ title: string; url: string }>;
+};
 
 // Extraheert JSON via brace counting — betrouwbaarder dan regex op grote tekst
 function extractJsonObject(text: string): object | null {
@@ -172,12 +178,14 @@ Fout voorbeeld: "BUUT lanceert nieuwe feature voor Gen Z"
 REGELS:
 - ALTIJD PRECIES 5 HOOKS. Nooit meer, nooit minder. Dit is niet-onderhandelbaar.
 - Hook: max 12 woorden, scherp en triggend, gaat over de trend/het nieuws
-- Toelichting: max 2 zinnen — (1) waarom is dit nieuws relevant? (2) hoe past het merk als expert/perspectief?
+- Explanation: max 2 zinnen — (1) waarom is dit nieuws relevant? (2) hoe past het merk als expert?
+- Hook_type: kies exact één van: "Sectortrend" | "Maatschappelijk thema" | "Cijfers & onderzoek" | "Cultureel moment" | "Politiek & regelgeving"
+- Strategic_rationale: max 1 zin — waarom is dit specifiek sterk voor dit merk? (anders dan de explanation)
 - Prioriteit: merknieuws gebruiken als context voor sectorthema's, niet als onderwerp
 - Taal: Nederlands (tenzij input volledig Engels)
 - Sources: max 2 per hook, alleen urls die letterlijk in de input staan
 
-COMPACT HOUDEN: Elke toelichting strict max 30 woorden. Schrijf beknopt.
+COMPACT HOUDEN: Explanation max 30 woorden. Strategic_rationale max 20 woorden.
 
 Geef de output in het volgende JSON formaat:
 {
@@ -185,6 +193,8 @@ Geef de output in het volgende JSON formaat:
     {
       "hook": "De hook tekst",
       "explanation": "De toelichting tekst",
+      "hook_type": "Sectortrend",
+      "strategic_rationale": "Waarom dit sterk is voor dit specifieke merk",
       "sources": [
         { "title": "Exacte titel van het artikel", "url": "https://..." }
       ]
