@@ -83,8 +83,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('News fetch error:', error);
+    const message = error instanceof Error ? error.message : 'Onbekende fout';
     return NextResponse.json(
-      { error: 'Er is een fout opgetreden bij het ophalen van nieuws' },
+      { error: `Nieuws niet beschikbaar: ${message}`, stage: 'news' },
       { status: 500 }
     );
   }

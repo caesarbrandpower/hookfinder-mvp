@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     const prompt = buildPrompt(websiteContent || '', safeBrandNews, safeSectorNews, safeGoogleNews, companyName, sector);
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5',
+      model: 'claude-sonnet-4-6',
       max_tokens: 2000,
       system: 'Je bent een PR-strateeg. Antwoord UITSLUITEND met valide JSON. Geen tekst, uitleg of markdown code-fences rondom de JSON. Begin direct met { en eindig met }.',
       messages: [
@@ -96,14 +96,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ hooks });
     }
 
-    console.error('JSON parse failed for all strategies.\nRaw:', rawText.slice(0, 800));
-    return NextResponse.json({
-      hooks: parseTextResponse(rawText),
-    });
+    console.error('JSON parse failed for all strategies.\nRaw Claude output:', rawText.slice(0, 1500));
+    return NextResponse.json(
+      {
+        error: 'Hooks niet gegenereerd: Claude gaf geen valide JSON terug. Probeer het opnieuw.',
+        stage: 'claude-parse',
+        rawPreview: rawText.slice(0, 300),
+      },
+      { status: 502 }
+    );
   } catch (error) {
     console.error('Generate error:', error);
+    const message = error instanceof Error ? error.message : 'Onbekende fout';
     return NextResponse.json(
-      { error: 'Er is een fout opgetreden bij het genereren van hooks' },
+      { error: `Hooks niet gegenereerd: ${message}`, stage: 'claude-call' },
       { status: 500 }
     );
   }
@@ -234,50 +240,3 @@ Geef de output in het volgende JSON formaat:
   return prompt;
 }
 
-// Fallback parser als JSON parsing faalt
-function parseTextResponse(text: string): Array<{ hook: string; explanation: string }> {
-  const hooks: Array<{ hook: string; explanation: string }> = [];
-  
-  // Probeer hooks te extraheren met regex
-  const hookMatches = text.match(/(?:Hook \d+|\d+\.)[:\s]*([^\n]+)/gi);
-  
-  if (hookMatches) {
-    hookMatches.forEach((match, index) => {
-      const lines = text.split('\n');
-      const hookLine = match.replace(/(?:Hook \d+|\d+\.)[:\s]*/i, '').trim();
-      
-      // Zoek toelichting na de hook
-      let explanation = '';
-      for (let i = 0; i < lines.length; i++) {
-        if (lines[i].includes(match) || lines[i].includes(hookLine)) {
-          // Neem de volgende 2-3 niet-lege regels als toelichting
-          let expLines = [];
-          for (let j = i + 1; j < lines.length && expLines.length < 3; j++) {
-            if (lines[j].trim() && !lines[j].match(/^(Hook \d+|\d+\.)[:\s]*/i)) {
-              expLines.push(lines[j].trim());
-            }
-          }
-          explanation = expLines.join(' ');
-          break;
-        }
-      }
-      
-      hooks.push({
-        hook: hookLine,
-        explanation: explanation || 'Toelichting niet gevonden in de output.',
-      });
-    });
-  }
-
-  // Als we geen hooks konden parsen, return een fallback
-  if (hooks.length === 0) {
-    return [
-      {
-        hook: 'Kon hooks niet correct genereren. Controleer de API configuratie.',
-        explanation: 'Er is een probleem opgetreden bij het parsen van de Claude output.',
-      },
-    ];
-  }
-
-  return hooks;
-}

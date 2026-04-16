@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       const errText = await response.text().catch(() => '');
       console.error('Jina error:', response.status, errText.slice(0, 200));
       return NextResponse.json(
-        { error: 'Kon website niet scrapen', content: '', usable: false },
+        { error: `Website niet leesbaar (Jina ${response.status})`, stage: 'jina', content: '', usable: false },
         { status: 200 }
       );
     }
