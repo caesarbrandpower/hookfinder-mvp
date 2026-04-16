@@ -67,11 +67,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const hooks = extractHooks(rawText);
-    console.log('Hooks parsed:', hooks ? hooks.length : 'null');
+    const allHooks = extractHooks(rawText);
+    console.log('Hooks parsed:', allHooks ? allHooks.length : 'null');
 
-    if (hooks) {
-      return NextResponse.json({ hooks });
+    if (allHooks) {
+      // Optie A: alleen hooks met minimaal één verificeerbare externe bron
+      const verified = allHooks.filter(
+        (h) => Array.isArray(h.sources) && h.sources.length > 0 && h.sources.some((s) => s.url && s.url.startsWith('http'))
+      );
+      console.log(`Hooks with sources: ${verified.length}/${allHooks.length}`);
+
+      if (verified.length === 0) {
+        return NextResponse.json(
+          { error: 'Onvoldoende actueel nieuws gevonden om hooks te verifiëren. Probeer een bredere zoekopdracht.' },
+          { status: 422 }
+        );
+      }
+
+      return NextResponse.json({ hooks: verified });
     }
 
     console.error('JSON parse failed.\nFull Claude output:', rawText);
@@ -183,7 +196,7 @@ REGELS:
 - Strategic_rationale: max 1 zin — waarom is dit specifiek sterk voor dit merk? (anders dan de explanation)
 - Prioriteit: merknieuws gebruiken als context voor sectorthema's, niet als onderwerp
 - Taal: Nederlands (tenzij input volledig Engels)
-- Sources: max 2 per hook, alleen urls die letterlijk in de input staan
+- Sources: VERPLICHT. Min 1, max 2 per hook. Alleen urls die LETTERLIJK in de input staan. Geen verzonnen urls. Als je geen bron kunt vinden voor een hook, sla die hook over en schrijf een andere.
 
 COMPACT HOUDEN: Explanation max 30 woorden. Strategic_rationale max 20 woorden.
 

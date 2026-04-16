@@ -540,7 +540,7 @@ export default function Home() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold text-white">
-                  5 PR-hooks gevonden
+                  {hooks.length} PR-{hooks.length === 1 ? 'hook' : 'hooks'} gevonden
                 </h2>
                 {usedFallback && (
                   <p className="text-sm mt-1" style={{ color: '#ddb3ff' }}>
